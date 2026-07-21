@@ -167,7 +167,9 @@ button { font: inherit; background: none; border: 0; color: inherit; cursor: poi
 .tcard {
   position: relative; min-height: 340px; display: flex; flex-direction: column; justify-content: flex-end;
   padding: 26px 24px; overflow: hidden; isolation: isolate; cursor: default;
-  background-image: var(--img); background-size: cover; background-position: center 25%;
+  /* сам background-image задаётся inline в HTML: url() внутри var() Chrome
+     резолвит относительно CSS-файла, и фото карточек не грузились */
+  background-size: cover; background-position: center 25%;
   border: 1px solid var(--c-border); transition: transform .35s var(--ease-out);
 }
 .tcard::after {
@@ -176,6 +178,15 @@ button { font: inherit; background: none; border: 0; color: inherit; cursor: poi
   transition: background .3s;
 }
 .tcard:hover { transform: translateY(-6px); }
+.tcard__icon {
+  width: 48px; height: 48px; display: grid; place-items: center;
+  margin-bottom: auto; /* прижимает текст карточки к низу, иконку — к верху */
+  background: rgba(10, 10, 11, .55); backdrop-filter: blur(4px);
+  border: 1px solid rgba(224, 43, 43, .45); color: var(--c-accent-hot);
+  transition: background .3s, border-color .3s;
+}
+.tcard:hover .tcard__icon { background: rgba(224, 43, 43, .25); border-color: var(--c-accent-hot); }
+.tcard__icon svg { width: 26px; height: 26px; }
 .tcard h3 { font-family: var(--font-display); text-transform: uppercase; font-size: 21px; margin-bottom: 8px; }
 .tcard h3::after { content: ""; display: block; width: 44px; height: 3px; background: var(--c-accent); margin-top: 8px; transition: width .3s var(--ease-out); }
 .tcard:hover h3::after { width: 80px; }
