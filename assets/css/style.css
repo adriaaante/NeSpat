@@ -284,7 +284,10 @@ button { font: inherit; background: none; border: 0; color: inherit; cursor: poi
 .footer__copy { color: #6d6a66; font-size: 13px; }
 
 /* ---------- Lightbox ---------- */
-.lightbox { border: 0; padding: 0; background: transparent; max-width: 100vw; max-height: 100vh; }
+/* Сброс * { margin: 0 } убивает у dialog штатный margin: auto, поэтому
+   центрируем сами: диалог во весь экран, контент — в центре сетки. */
+.lightbox { position: fixed; inset: 0; width: 100vw; height: 100vh; max-width: 100vw; max-height: 100vh; border: 0; padding: 0; background: transparent; }
+.lightbox[open] { display: grid; place-items: center; }
 .lightbox::backdrop { background: rgba(5, 5, 6, .92); backdrop-filter: blur(6px); }
 .lightbox__content { display: grid; place-items: center; }
 .lightbox__content img, .lightbox__content video { max-width: min(92vw, 900px); max-height: 88vh; object-fit: contain; box-shadow: 0 20px 80px rgba(0,0,0,.6); }
