@@ -1,6 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 46">
-  <path fill="#0a0a0b" d="M20 0 40 6v22c0 8-8 14-20 18C8 42 0 36 0 28V6L20 0Z"/>
-  <text x="20" y="20" text-anchor="middle" font-family="Arial Narrow, Arial, sans-serif" font-weight="bold" font-size="15" fill="#f5f4f2">НС</text>
-  <path fill="#e02b2b" d="m12 24 8 5 8-5v5l-8 5-8-5v-5Z"/>
-  <path fill="#f5f4f2" d="m12 31 8 5 8-5v5l-8 5-8-5v-5Z"/>
-</svg>
