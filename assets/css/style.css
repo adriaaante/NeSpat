@@ -55,6 +55,8 @@ button { font: inherit; background: none; border: 0; color: inherit; cursor: poi
 }
 .nav.is-scrolled { background: rgba(10, 10, 11, .88); backdrop-filter: blur(12px); box-shadow: 0 1px 0 var(--c-border); }
 .nav__logo { display: flex; align-items: center; gap: 10px; }
+.nav__mark { width: 30px; height: auto; }
+.footer__mark { width: 34px; height: auto; }
 .nav__wordmark { font-family: var(--font-display); font-weight: 700; font-size: 18px; letter-spacing: .06em; line-height: 1.05; display: flex; flex-direction: column; }
 .nav__wordmark em { font-style: normal; color: var(--c-accent-hot); font-size: 10px; letter-spacing: .5em; }
 .nav__links { display: flex; align-items: center; gap: clamp(16px, 2.5vw, 34px); }
