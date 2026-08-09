@@ -50,8 +50,16 @@
     }, { passive: true });
   }
 
-  /* ---------- Галерея: автоплей превью-видео в кадре ---------- */
-  const videos = document.querySelectorAll(".gallery__item video");
+  /* ---------- Ссылки на Telegram-сообщество из конфига ---------- */
+  const cfgEarly = window.NESPAT_CONFIG || {};
+  if (cfgEarly.telegramCommunityUrl) {
+    document.querySelectorAll("[data-tg-community]").forEach((a) => {
+      a.href = cfgEarly.telegramCommunityUrl;
+    });
+  }
+
+  /* ---------- Галерея и большое видео: автоплей превью в кадре ---------- */
+  const videos = document.querySelectorAll(".gallery__item video, .bigvideo__frame video");
   if (!reducedMotion) {
     const videoObserver = new IntersectionObserver((entries) => {
       for (const entry of entries) {
@@ -80,7 +88,7 @@
   lightbox.addEventListener("click", (e) => { if (e.target === lightbox) closeLightbox(); });
   lightbox.addEventListener("close", () => lightboxContent.replaceChildren());
 
-  document.querySelectorAll(".gallery__item").forEach((item) => {
+  document.querySelectorAll(".gallery__item, .bigvideo__frame").forEach((item) => {
     item.addEventListener("click", () => {
       const video = item.querySelector("video");
       if (video) {
