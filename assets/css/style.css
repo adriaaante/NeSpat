@@ -40,7 +40,8 @@ button { font: inherit; background: none; border: 0; color: inherit; cursor: poi
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .reveal { opacity: 1; transform: none; transition: none; }
-  .ticker__track { animation: none !important; }
+  /* бегущую строку не останавливаем (фирменный элемент) — только замедляем */
+  .ticker__track { animation-duration: 84s !important; }
   .hero__scroll { display: none; }
 }
 
