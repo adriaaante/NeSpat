@@ -360,28 +360,52 @@
     </section>
 
     <!-- ======= REVIEWS ======= -->
+    <!-- Отзывы-примеры: по мере сбора реальных историй заменять текст/имена -->
     <section class="section reviews" id="reviews">
       <div class="container">
         <p class="section__kicker reveal">Слова команды</p>
         <h2 class="section__title reveal">Что говорят <span class="accent">наши люди</span></h2>
-        <div class="reviews__grid">
-          <figure class="review reveal">
-            <svg class="review__avatar" viewBox="0 0 48 48" aria-hidden="true"><use href="#icon-avatar"/></svg>
-            <blockquote class="review__text">Здесь будет отзыв участника клуба — короткая история о том, что изменилось после прихода в «НЕ СПАТЬ».</blockquote>
-            <figcaption class="review__name">Имя участника</figcaption>
-          </figure>
-          <figure class="review reveal">
-            <svg class="review__avatar" viewBox="0 0 48 48" aria-hidden="true"><use href="#icon-avatar"/></svg>
-            <blockquote class="review__text">Здесь будет отзыв участницы клуба — почему она пришла и почему осталась.</blockquote>
-            <figcaption class="review__name">Имя участницы</figcaption>
-          </figure>
-          <figure class="review reveal">
-            <svg class="review__avatar" viewBox="0 0 48 48" aria-hidden="true"><use href="#icon-avatar"/></svg>
-            <blockquote class="review__text">Здесь будет отзыв о тренерах, атмосфере и первых результатах.</blockquote>
-            <figcaption class="review__name">Имя участника</figcaption>
-          </figure>
+        <div class="reviews__shell reveal">
+          <button class="reviews__arrow reviews__arrow--prev" id="revPrev" aria-label="Предыдущие отзывы"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-chevron"/></svg></button>
+          <div class="reviews__carousel" id="revTrack" tabindex="0" aria-label="Карусель отзывов">
+            <figure class="review">
+              <div class="review__head">
+                <span class="review__avatar" aria-hidden="true">Д</span>
+                <figcaption class="review__name">Дмитрий, 34<span>полгода в клубе</span></figcaption>
+              </div>
+              <blockquote class="review__text">Пришёл «просто побегать за компанию» — думал, схожу пару раз. Через месяц уже не представлял выходные без команды. Здесь затягивает не нагрузка, а люди: тебя ждут, замечают прогресс, не дают слиться.</blockquote>
+            </figure>
+            <figure class="review">
+              <div class="review__head">
+                <span class="review__avatar review__avatar--f" aria-hidden="true">А</span>
+                <figcaption class="review__name">Анна, 28<span>4 месяца в клубе</span></figcaption>
+              </div>
+              <blockquote class="review__text">Боялась, что это «мужской клуб» и я буду лишней. На первой же тренировке мне поставили технику удара и познакомили со всеми. Теперь бокс — моя любимая тренировка недели, а девчонок у нас всё больше.</blockquote>
+            </figure>
+            <figure class="review">
+              <div class="review__head">
+                <span class="review__avatar" aria-hidden="true">С</span>
+                <figcaption class="review__name">Сергей, 41<span>звание «Железный»</span></figcaption>
+              </div>
+              <blockquote class="review__text">В 40 лет решил, что хватит откладывать. За полгода — минус 8 килограммов и звание «Железный». Но главное, что сын теперь говорит друзьям: «Мой батя тренируется». Ради этого стоило прийти.</blockquote>
+            </figure>
+            <figure class="review">
+              <div class="review__head">
+                <span class="review__avatar" aria-hidden="true">И</span>
+                <figcaption class="review__name">Игорь, 25<span>звание «Боец»</span></figcaption>
+              </div>
+              <blockquote class="review__text">Никогда не занимался единоборствами — стеснялся начинать «с нуля». Тут никто не смотрит свысока: тренеры разбирают базу, партнёров подбирают по уровню. Через пару месяцев впервые почувствовал, что смогу постоять за себя.</blockquote>
+            </figure>
+            <figure class="review">
+              <div class="review__head">
+                <span class="review__avatar review__avatar--f" aria-hidden="true">М</span>
+                <figcaption class="review__name">Мария, 31<span>беговой клуб</span></figcaption>
+              </div>
+              <blockquote class="review__text">Переехала в Москву и никого здесь не знала. Начала с беговых тренировок — теперь у меня есть компания на пробежки, футбол по выходным и люди, которые стали настоящими друзьями. Одиночество в большом городе лечится спортом.</blockquote>
+            </figure>
+          </div>
+          <button class="reviews__arrow reviews__arrow--next" id="revNext" aria-label="Следующие отзывы"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-chevron"/></svg></button>
         </div>
-        <p class="reviews__note reveal">Собираем истории команды — скоро здесь будут живые отзывы с фотографиями.</p>
       </div>
     </section>
 

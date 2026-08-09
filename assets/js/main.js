@@ -183,6 +183,35 @@
     }
   });
 
+  /* ---------- Карусель отзывов ---------- */
+  const revTrack = document.getElementById("revTrack");
+  if (revTrack) {
+    const step = () => {
+      const card = revTrack.querySelector(".review");
+      return card ? card.offsetWidth + 16 : 320;
+    };
+    const scrollByCards = (dir) => {
+      const max = revTrack.scrollWidth - revTrack.clientWidth;
+      let next = revTrack.scrollLeft + dir * step();
+      if (next > max + 4) next = 0;               // с конца — в начало
+      if (next < -4) next = max;                  // с начала — в конец
+      revTrack.scrollTo({ left: next, behavior: "smooth" });
+    };
+    document.getElementById("revPrev").addEventListener("click", () => scrollByCards(-1));
+    document.getElementById("revNext").addEventListener("click", () => scrollByCards(1));
+
+    if (!reducedMotion) {
+      let timer = setInterval(() => scrollByCards(1), 6000);
+      const pause = () => { clearInterval(timer); timer = null; };
+      const resume = () => { if (!timer) timer = setInterval(() => scrollByCards(1), 6000); };
+      revTrack.addEventListener("pointerenter", pause);
+      revTrack.addEventListener("pointerleave", resume);
+      revTrack.addEventListener("touchstart", pause, { passive: true });
+      revTrack.addEventListener("focusin", pause);
+      revTrack.addEventListener("focusout", resume);
+    }
+  }
+
   /* ---------- Год в подвале ---------- */
   document.getElementById("year").textContent = String(new Date().getFullYear());
 })();
