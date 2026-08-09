@@ -10,8 +10,8 @@ window.NESPAT_CONFIG = {
   telegramChatId: "",     // например "-1001234567890"
   // Запасной вариант: если токен не настроен, кнопка формы предложит
   // написать напрямую в Telegram по этой ссылке (укажите свою группу/аккаунт).
-  telegramFallbackUrl: "https://t.me/",
+  telegramFallbackUrl: "https://t.me/nosleepmosc0w",
   // Публичная ссылка на Telegram-сообщество клуба — подставляется во все
   // кнопки «Вступить в Telegram» на сайте.
-  telegramCommunityUrl: "https://t.me/",
+  telegramCommunityUrl: "https://t.me/nosleepmosc0w",
 };
