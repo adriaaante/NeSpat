@@ -23,12 +23,27 @@
   автоплей-превью в галерее).
 - `.claude/skills/` — 7 скиллов пакета UI/UX Pro Max v2.11.0 (апстрим,
   руками не редактировать; обновлять целиком из релиза).
+- `404.html` — страница ошибки в фирменной палитре (подключена через
+  `ErrorDocument` в `.htaccess`); `robots.txt`, `sitemap.xml` — для поиска.
 
 ## Деплой
-GitHub Pages, «Deploy from a branch»: ветка `claude/install-ui-ux-pro-max-skill-8bfxro`,
-корень репо. Прод: https://adriaaante.github.io/NeSpat/ — обновляется сам
-через ~1–2 мин после пуша в эту ветку. Проверка: grep нужной строки в HTML
-по URL. Сборки нет — раздаётся корень как есть.
+- **Боевой хостинг — Beget** (аккаунт `dudareid`, сервер `dudareid.beget.tech`,
+  там же voidaform.ru и подноль.рф). Выкладка автоматическая:
+  `.github/workflows/deploy.yml` — push в `claude/install-ui-ux-pro-max-skill-8bfxro`
+  (или `main`) → заливка по FTP. Нужны секреты репо `FTP_SERVER`/`FTP_USERNAME`/
+  `FTP_PASSWORD`/`FTP_DIR`; без них шаг мягко пропускается (warning, не ошибка).
+  На хостинг не едут `.github/`, `.claude/`, `CLAUDE.md`.
+- **Три домена, один сайт.** Основной — **nespatmoskva.ru**; `dontsleepmoscow.ru`
+  и `неспатьмосква.рф` (punycode `xn--80aafk0alelgtej4k.xn--p1ai`) склеены с ним
+  301-м редиректом в `.htaccess` (там же https, без www, кэш, gzip, Accept-Ranges
+  для mp4 — иначе не перематывается видео). Canonical/OG/sitemap/robots смотрят
+  на nespatmoskva.ru. При смене основного домена править: `.htaccess`,
+  `index.html` (canonical, og:url, og:image, JSON-LD), `robots.txt`, `sitemap.xml`.
+- Все три домена должны быть привязаны к одному сайту в панели Beget, и на
+  каждом выпущен свой SSL Let's Encrypt — иначе редирект с https зеркала
+  упрётся в ошибку сертификата раньше, чем сработает.
+- GitHub Pages (https://adriaaante.github.io/NeSpat/) остаётся как запасная
+  витрина; canonical смотрит на домен, дублем в поиске не станет.
 
 ## Форма заявок → Telegram
 Заявки (имя + телефон) шлются ботом в группу напрямую из браузера через

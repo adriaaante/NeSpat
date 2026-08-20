@@ -1,0 +1,61 @@
+name: Deploy to Beget
+
+# Сайт выкладывается автоматически при каждом пуше в основную ветку.
+# Нужны секреты репозитория: FTP_SERVER / FTP_USERNAME / FTP_PASSWORD / FTP_DIR.
+# Пока секретов нет — шаг выкладки пропускается с предупреждением, не ошибкой.
+on:
+  push:
+    branches: [claude/install-ui-ux-pro-max-skill-8bfxro, main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-beget
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Проверить, что секреты FTP заданы
+        id: gate
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+        run: |
+          if [ -z "$FTP_SERVER" ]; then
+            echo "::warning::секрет FTP_SERVER не задан — выкладка на Beget пропущена"
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Забрать код
+        if: steps.gate.outputs.ready == 'true'
+        uses: actions/checkout@v4
+
+      - name: Проверить, что ключевые файлы на месте
+        if: steps.gate.outputs.ready == 'true'
+        run: |
+          for f in index.html 404.html .htaccess robots.txt sitemap.xml \
+                   assets/css/style.css assets/js/main.js assets/js/config.js \
+                   assets/img/team-main.jpg assets/img/monogram.png; do
+            [ -f "$f" ] || { echo "::error::нет файла $f — выкладка остановлена"; exit 1; }
+          done
+          echo "все ключевые файлы на месте"
+
+      - name: Залить на хостинг по FTP
+        if: steps.gate.outputs.ready == 'true'
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: ${{ secrets.FTP_DIR }}
+          protocol: ftp
+          # служебные файлы на хостинг не нужны
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/.github/**
+            **/.claude/**
+            CLAUDE.md
+            **/.DS_Store
