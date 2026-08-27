@@ -477,6 +477,29 @@ button { font: inherit; background: none; border: 0; color: inherit; cursor: poi
 .community__welcome strong { color: var(--c-accent-hot); }
 .community__actions { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
 
+/* ---------- Бейдж студии-разработчика ----------
+   Каноническая реализация FutureFlow: полупрозрачная подложка (подходит любому
+   тёмному фону), градиентная надпись, свечение у чипа и ховер.
+   Цвета бейджа под сайт НЕ перекрашиваем — это фирменный знак. */
+.ff-credit {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 7px 14px 7px 11px; border-radius: 100px;
+  background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.12);
+  color: rgba(255,255,255,.7); text-decoration: none; font-size: 12.5px;
+  transition: background .2s ease, border-color .2s ease, color .2s ease, transform .2s ease;
+}
+.ff-credit:hover, .ff-credit:focus-visible {
+  background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.25);
+  color: #fff; transform: translateY(-1px);
+}
+.ff-credit__mark { display: block; flex-shrink: 0; filter: drop-shadow(0 0 6px rgba(74, 139, 217, .35)); }
+.ff-credit__brand {
+  font-weight: 700; letter-spacing: .01em;
+  background: linear-gradient(90deg, #c8dcf4 0%, #ffffff 50%, #f5a623 100%);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; color: transparent;
+}
+
 /* ---------- Footer ---------- */
 .footer { background: var(--c-bg); border-top: 1px solid var(--c-border); padding: 34px 0; }
 .footer__inner { display: flex; flex-wrap: wrap; gap: 20px; align-items: center; justify-content: space-between; }
