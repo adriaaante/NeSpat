@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Руководство по выдаче сертификатов — НЕ СПАТЬ МОСКВА</title>
+  <meta name="description" content="Пошаговое руководство: как выдать именной сертификат о звании в клубе «НЕ СПАТЬ МОСКВА», отправить его участнику, распечатать и проверить подлинность.">
+  <meta name="robots" content="noindex, follow">
+  <meta name="theme-color" content="#0a0a0b">
+  <link rel="icon" href="assets/img/favicon.png" type="image/png">
+  <style>
+    /* Шрифты те же, что на сайте (хостятся у нас, Google Fonts не подключаем) */
+    @font-face { font-family:"Oswald"; src:url("assets/fonts/oswald-cyrillic.woff2") format("woff2"); font-weight:400 700; font-display:swap; unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116; }
+    @font-face { font-family:"Oswald"; src:url("assets/fonts/oswald-latin.woff2") format("woff2"); font-weight:400 700; font-display:swap; unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+2000-206F,U+2122,U+2212; }
+    @font-face { font-family:"Inter"; src:url("assets/fonts/inter-cyrillic.woff2") format("woff2"); font-weight:400 700; font-display:swap; unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116; }
+    @font-face { font-family:"Inter"; src:url("assets/fonts/inter-latin.woff2") format("woff2"); font-weight:400 700; font-display:swap; unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+2000-206F,U+2122,U+2212; }
+
+    :root {
+      --bg:#0a0a0b; --bg2:#121214; --surface:#1a1a1d; --line:#2a2a2e;
+      --text:#f5f4f2; --dim:#b6b3ae; --mute:#6d6a66;
+      --red:#e02b2b; --red-hot:#ff3b3b; --gold:#ffc93c; --ok:#58d68d;
+      --disp:"Oswald","Arial Narrow",sans-serif;
+      --body:"Inter",system-ui,sans-serif;
+    }
+    *,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+    body { background:var(--bg); color:var(--text); font-family:var(--body); line-height:1.62; -webkit-font-smoothing:antialiased; }
+    img { display:block; max-width:100%; height:auto; }
+    a { color:inherit; }
+    .page { max-width:900px; margin-inline:auto; padding:32px 24px 70px; }
+
+    /* ---------- обложка ---------- */
+    .cover { text-align:center; padding:34px 0 26px; border-bottom:1px solid var(--line); }
+    .cover__mark { width:86px; margin:0 auto 20px; }
+    .cover__club { font-family:var(--disp); font-size:12px; letter-spacing:.4em; text-transform:uppercase; color:var(--dim); }
+    .cover__title { font-family:var(--disp); font-weight:700; text-transform:uppercase; font-size:clamp(28px,5.4vw,44px); line-height:1.08; margin:14px 0 10px; }
+    .cover__title span { color:var(--red-hot); }
+    .cover__lead { color:var(--dim); max-width:600px; margin:0 auto; font-size:15.5px; }
+    .cover__by { display:inline-flex; align-items:center; gap:8px; margin-top:22px; padding:7px 14px 7px 11px; border-radius:100px;
+      background:#141416; border:1px solid rgba(224,43,43,.35); color:rgba(255,255,255,.78); text-decoration:none; font:600 12.5px/1 var(--body); }
+    .cover__by span b { font-weight:700; background:linear-gradient(90deg,#c8dcf4,#fff 50%,#f5a623); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; color:transparent; }
+    .cover__actions { margin-top:24px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+    .btn { display:inline-flex; align-items:center; gap:9px; font-family:var(--disp); font-weight:600; font-size:14px; text-transform:uppercase;
+      letter-spacing:.07em; padding:13px 24px; text-decoration:none; clip-path:polygon(9px 0,100% 0,calc(100% - 9px) 100%,0 100%); }
+    .btn--red { background:var(--red); color:#fff; }
+    .btn--ghost { background:rgba(245,244,242,.08); color:var(--text); outline:1px solid rgba(245,244,242,.22); outline-offset:-1px; }
+
+    /* ---------- оглавление ---------- */
+    .toc { margin-top:30px; background:var(--surface); border:1px solid var(--line); padding:22px 24px; }
+    .toc h2 { font-family:var(--disp); text-transform:uppercase; font-size:15px; letter-spacing:.1em; color:var(--dim); margin-bottom:12px; }
+    .toc ol { list-style:none; counter-reset:t; display:grid; gap:7px; }
+    .toc li { counter-increment:t; font-size:15px; }
+    .toc li::before { content:counter(t) "."; color:var(--red-hot); font-family:var(--disp); margin-right:9px; }
+    .toc a { text-decoration:none; border-bottom:1px solid transparent; }
+    .toc a:hover { border-color:var(--red); }
+
+    /* ---------- секции ---------- */
+    section { margin-top:44px; }
+    .h2 { font-family:var(--disp); font-weight:700; text-transform:uppercase; font-size:clamp(21px,3.4vw,28px); line-height:1.15; padding-bottom:10px; border-bottom:2px solid var(--red); margin-bottom:8px; }
+    .h2 small { display:block; font-family:var(--body); font-weight:400; text-transform:none; letter-spacing:0; font-size:14px; color:var(--dim); margin-top:6px; }
+    .lead { color:var(--dim); font-size:15px; margin-top:14px; }
+
+    .cards { display:grid; gap:14px; margin-top:20px; }
+    @media (min-width:720px){ .cards--3 { grid-template-columns:repeat(3,1fr); } }
+    .card { background:var(--surface); border:1px solid var(--line); padding:18px 20px; break-inside:avoid; }
+    .card h3 { font-family:var(--disp); text-transform:uppercase; font-size:16px; letter-spacing:.04em; margin-bottom:6px; }
+    .card p { color:var(--dim); font-size:14px; }
+
+    /* шаг */
+    .step { margin-top:26px; }
+    .step > * + * { margin-top:18px; }
+    @media (min-width:760px){
+      .step--split { display:grid; grid-template-columns:1fr 1fr; gap:18px; align-items:start; break-inside:avoid; }
+      .step--split > * + * { margin-top:0; }
+    }
+    .step__no { display:inline-grid; place-items:center; width:34px; height:34px; background:var(--red); color:#fff;
+      font-family:var(--disp); font-weight:700; font-size:16px; clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%); }
+    .step__head { display:flex; align-items:center; gap:12px; margin-bottom:8px; }
+    .step__title { font-family:var(--disp); text-transform:uppercase; font-size:19px; letter-spacing:.03em; }
+    .step__body p { color:var(--dim); font-size:14.5px; }
+    .step__body p + p { margin-top:9px; }
+    .step__body b { color:var(--text); }
+    .shot { border:1px solid var(--line); background:var(--bg2); }
+    .shot--pad { padding:10px; }
+    .cap { font-size:12.5px; color:var(--mute); margin-top:7px; }
+
+    .tip { border-left:3px solid var(--gold); background:rgba(255,201,60,.07); padding:13px 16px; margin-top:14px; font-size:14px; color:var(--dim); break-inside:avoid; }
+    .tip b { color:var(--gold); }
+    .warn { border-left:3px solid var(--red); background:rgba(224,43,43,.08); padding:13px 16px; margin-top:14px; font-size:14px; color:var(--dim); break-inside:avoid; }
+    .warn b { color:var(--red-hot); }
+
+    /* галерея званий */
+    .ranks { display:grid; gap:22px; margin-top:22px; }
+    @media (min-width:760px){ .ranks { grid-template-columns:1fr 1fr; } }
+    .rank { break-inside:avoid; }
+    .rank__head { display:flex; align-items:center; gap:11px; margin-bottom:9px; }
+    .rank__num { display:grid; place-items:center; width:30px; height:30px; font-family:var(--disp); font-weight:700; font-size:13px; color:#0a0a0b;
+      clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%); }
+    .rank__name { font-family:var(--disp); text-transform:uppercase; font-size:17px; letter-spacing:.03em; }
+    .rank__for { font-size:13px; color:var(--mute); }
+    .rank img { border:1px solid var(--line); }
+
+    /* вопросы */
+    .qa { margin-top:16px; display:grid; gap:12px; }
+    .qa__item { background:var(--surface); border:1px solid var(--line); padding:16px 18px; break-inside:avoid; }
+    .qa__q { font-family:var(--disp); text-transform:uppercase; font-size:15px; letter-spacing:.03em; margin-bottom:6px; }
+    .qa__a { color:var(--dim); font-size:14px; }
+
+    table.spec { width:100%; border-collapse:collapse; margin-top:16px; font-size:14px; table-layout:fixed; }
+    table.spec td { border:1px solid var(--line); padding:10px 13px; vertical-align:top; overflow-wrap:anywhere; }
+    table.spec td:first-child { color:var(--mute); width:38%; }
+    /* на узких экранах таблица становится списком: длинные адреса не влезают в две колонки */
+    @media (max-width:560px){
+      table.spec, table.spec tbody, table.spec tr, table.spec td { display:block; width:100%; }
+      table.spec tr { border:1px solid var(--line); margin-bottom:10px; }
+      table.spec td { border:0; padding:10px 13px; }
+      table.spec td:first-child { width:auto; padding-bottom:0; font-size:12px; letter-spacing:.06em; text-transform:uppercase; }
+    }
+
+    /* подвал */
+    .foot { margin-top:52px; padding-top:22px; border-top:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; }
+    .foot__note { font-size:12.5px; color:var(--mute); }
+
+    /* ---------- печать в PDF ----------
+       Поля страницы нулевые, отступы задаём внутри — тогда фирменный тёмный
+       фон покрывает лист целиком, без белой рамки по краям. */
+    @page { size:A4 portrait; margin:0; }
+    @media print {
+      html, body { background:#0a0a0b !important; -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
+      .page { max-width:none; padding:15mm 14mm; }
+      .no-print { display:none !important; }
+      /* секции не начинаем принудительно с новой страницы — иначе половина
+         листов остаётся пустой; следим только за неразрывностью блоков */
+      section { margin-top:11mm; }
+      section#ranks { break-before:page; }
+      .h2 { break-after:avoid; }
+      /* .step без --split может содержать несколько крупных снимков: если
+         запретить ему разрываться, страницы остаются полупустыми */
+      .step { break-inside:auto; }
+      /* очень длинные снимки (форма выдачи) ужимаем по высоте, иначе
+         неразрывный блок не влезает и оставляет полстраницы пустой */
+      .step--split figure img { max-height:132mm; width:auto; margin-inline:auto; }
+      .step figure img { max-height:150mm; width:auto; margin-inline:auto; }
+      .step--split, .card, .rank, .qa__item, .tip, .warn, figure, table.spec { break-inside:avoid; }
+      .foot { break-inside:avoid; }
+      a { text-decoration:none; }
+      /* градиентный текст в печати даёт полосы — бейдж делаем сплошным */
+      .cover__by span b { background:none !important; -webkit-text-fill-color:#f5a623 !important; color:#f5a623 !important; }
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ОБЛОЖКА -->
+  <header class="cover">
+    <img class="cover__mark" src="assets/img/monogram.png" alt="">
+    <p class="cover__club">Спортивный клуб «НЕ СПАТЬ МОСКВА»</p>
+    <h1 class="cover__title">Руководство<br>по выдаче <span>сертификатов</span></h1>
+    <p class="cover__lead">Как присвоить участнику звание, отправить ему именной сертификат,
+      распечатать бланк и подтвердить подлинность. Пошагово, со снимками экрана.</p>
+    <a class="cover__by" href="https://futureflow.ru" target="_blank" rel="noopener">
+      <svg width="20" height="20" viewBox="0 0 32 32" fill="none" stroke="url(#ffg)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <defs><linearGradient id="ffg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#c8dcf4"/><stop offset=".5" stop-color="#fff"/><stop offset="1" stop-color="#f5a623"/></linearGradient></defs>
+        <rect x="8" y="8" width="16" height="16" rx="2.5"/>
+        <path d="M12 8V4M16 8V4M20 8V4 M12 28V24M16 28V24M20 28V24 M8 12H4M8 16H4M8 20H4 M28 12H24M28 16H24M28 20H24"/>
+      </svg>
+      <span>Подготовлено в&nbsp;<b>FutureFlow</b></span>
+    </a>
+    <div class="cover__actions no-print">
+      <a class="btn btn--red" href="assets/doc/nespat-certificates-guide.pdf" download>Скачать PDF</a>
+      <a class="btn btn--ghost" href="certificate-studio.html">Открыть студию выдачи</a>
+    </div>
+  </header>
+
+  <nav class="toc no-print">
+    <h2>Содержание</h2>
+    <ol>
+      <li><a href="#how">Как устроена система</a></li>
+      <li><a href="#issue">Выдача сертификата: 5 шагов</a></li>
+      <li><a href="#member">Что видит участник</a></li>
+      <li><a href="#print">Печать бланка</a></li>
+      <li><a href="#verify">Проверка подлинности</a></li>
+      <li><a href="#ranks">Все семь званий и их бланки</a></li>
+      <li><a href="#faq">Частые вопросы</a></li>
+    </ol>
+  </nav>
+
+  <!-- 1. КАК УСТРОЕНО -->
+  <section id="how" class="keep">
+    <h2 class="h2">1. Как устроена система
+      <small>Три страницы, каждая для своей задачи. Ничего устанавливать не нужно — всё работает в браузере.</small>
+    </h2>
+    <div class="cards cards--3">
+      <div class="card">
+        <h3>Студия выдачи</h3>
+        <p>Закрытая страница клуба под пин-кодом. Здесь вы создаёте сертификат и получаете ссылку для участника.</p>
+      </div>
+      <div class="card">
+        <h3>Сертификат участника</h3>
+        <p>Персональная ссылка. Открывается у любого, кому её передали: посмотреть, распечатать, показать друзьям.</p>
+      </div>
+      <div class="card">
+        <h3>Проверка подлинности</h3>
+        <p>Открытая страница. По номеру и имени подтверждает, что звание действительно присвоено клубом.</p>
+      </div>
+    </div>
+    <table class="spec">
+      <tr><td>Студия выдачи</td><td><b>nespatmoskva.ru/certificate-studio.html</b> — пин-код <b>1234</b></td></tr>
+      <tr><td>Проверка подлинности</td><td><b>nespatmoskva.ru/certificate.html</b></td></tr>
+      <tr><td>Где хранятся сертификаты</td><td>Нигде: сертификат целиком зашит в ссылку и подписан ключом клуба. Базы данных нет, платить за неё не нужно.</td></tr>
+      <tr><td>Что нужно для работы</td><td>Любой браузер на компьютере или телефоне. Интернет — только чтобы открыть страницу.</td></tr>
+    </table>
+  </section>
+
+  <!-- 2. ВЫДАЧА -->
+  <section id="issue">
+    <h2 class="h2">2. Выдача сертификата: 5 шагов
+      <small>От пустой формы до готовой ссылки — примерно минута.</small>
+    </h2>
+
+    <div class="step step--split">
+      <div class="step__body">
+        <div class="step__head"><span class="step__no">1</span><span class="step__title">Войти в студию</span></div>
+        <p>Откройте <b>nespatmoskva.ru/certificate-studio.html</b> и введите пин-код <b>1234</b>.</p>
+        <p>Пока вкладка открыта, пин больше не спросят. Кнопка <b>«Выйти»</b> в правом верхнем углу закрывает доступ — нажимайте её, если работаете с чужого компьютера.</p>
+      </div>
+      <figure>
+        <img class="shot" src="assets/img/guide/01-gate.jpg" alt="Экран входа в студию выдачи с полем для пин-кода">
+        <figcaption class="cap">Экран входа. Пин-код — 1234.</figcaption>
+      </figure>
+    </div>
+
+    <div class="step step--split">
+      <div class="step__body">
+        <div class="step__head"><span class="step__no">2</span><span class="step__title">Заполнить данные</span></div>
+        <p><b>Имя и фамилия</b> — ровно так, как будет напечатано на бланке. Имя входит в подпись сертификата, поэтому потом его не изменить: проверьте перед выдачей.</p>
+        <p><b>Звание</b> — нажмите нужное из семи. Бланк сразу перекрасится в цвета этого звания.</p>
+        <p><b>Дата выдачи</b> — по умолчанию сегодняшняя.</p>
+        <p><b>Комментарий</b> — необязательная строка под девизом, например «за победу на турнире клуба».</p>
+      </div>
+      <figure>
+        <img class="shot" src="assets/img/guide/02-form.jpg" alt="Форма выдачи: имя, выбор звания, дата и комментарий">
+        <figcaption class="cap">Форма выдачи. Звание выбирается одним нажатием.</figcaption>
+      </figure>
+    </div>
+
+    <div class="step step--split">
+      <div class="step__body">
+        <div class="step__head"><span class="step__no">3</span><span class="step__title">Проверить бланк</span></div>
+        <p>Справа виден живой предпросмотр — <b>ровно то, что увидит участник и что уйдёт на печать</b>. Меняете имя или звание — бланк перерисовывается сразу.</p>
+        <p>Убедитесь, что имя без опечаток, звание верное, а дата та, что нужна.</p>
+      </div>
+      <figure>
+        <img class="shot" src="assets/img/guide/04-preview.jpg" alt="Предпросмотр готового бланка сертификата">
+        <figcaption class="cap">Предпросмотр обновляется при каждом изменении.</figcaption>
+      </figure>
+    </div>
+
+    <div class="step step--split">
+      <div class="step__body">
+        <div class="step__head"><span class="step__no">4</span><span class="step__title">Забрать номер и ссылку</span></div>
+        <p>Под формой появятся <b>номер сертификата</b> (например NSM-5-2608-4NUJFX) и <b>ссылка для участника</b>.</p>
+        <p><b>Скопировать ссылку</b> — положить в буфер обмена.<br>
+           <b>Отправить</b> — открыть Telegram с готовым поздравлением.<br>
+           <b>Открыть</b> — посмотреть сертификат так, как его увидит участник.</p>
+      </div>
+      <figure>
+        <img class="shot" src="assets/img/guide/03-link.jpg" alt="Номер сертификата, ссылка и кнопки отправки">
+        <figcaption class="cap">Номер и ссылка появляются автоматически.</figcaption>
+      </figure>
+    </div>
+
+    <div class="step step--split">
+      <div class="step__body">
+        <div class="step__head"><span class="step__no">5</span><span class="step__title">Отправить участнику</span></div>
+        <p>Отправьте ссылку любым способом — Telegram, WhatsApp, СМС. Сертификат откроется у любого, кто её получит.</p>
+        <p>Все выданные сертификаты складываются в список <b>«Выданные сертификаты»</b>: оттуда можно заново скопировать ссылку, открыть бланк или убрать запись.</p>
+      </div>
+      <figure>
+        <img class="shot" src="assets/img/guide/05-history.jpg" alt="Список ранее выданных сертификатов">
+        <figcaption class="cap">История выдачи с быстрыми действиями.</figcaption>
+      </figure>
+    </div>
+
+    <div class="tip"><b>Полезно знать.</b> Если выдать сертификат тем же участникам с теми же данными повторно, номер получится <b>точно такой же</b>. Дубликаты не появятся, а потерянную ссылку всегда можно собрать заново — просто введите те же имя, звание и месяц.</div>
+    <div class="warn"><b>Важно.</b> История хранится только в том браузере, где вы выдавали сертификаты. С другого компьютера она не видна, поэтому ссылку участнику лучше отправлять сразу.</div>
+  </section>
+
+  <!-- 3. УЧАСТНИК -->
+  <section id="member">
+    <h2 class="h2">3. Что видит участник
+      <small>Ссылка открывается и на компьютере, и на телефоне.</small>
+    </h2>
+    <div class="step">
+      <figure>
+        <img class="shot" src="assets/img/guide/06-intro.jpg" alt="Заставка с именем участника и кнопкой «Открыть сертификат»">
+        <figcaption class="cap">Сначала — заставка с монограммой клуба, именем и званием.</figcaption>
+      </figure>
+      <figure>
+        <img class="shot" src="assets/img/guide/07-opened.jpg" alt="Открытый сертификат с зелёной отметкой подлинности">
+        <figcaption class="cap">После нажатия бланк появляется с искрами в цвет звания. Сверху — зелёная отметка «Подлинный сертификат клуба» и номер.</figcaption>
+      </figure>
+    </div>
+    <p class="lead">Под бланком участник видит кнопки: <b>«Распечатать / PDF»</b>, <b>«Скопировать ссылку»</b> и <b>«Все звания клуба»</b>,
+      а также карточки с данными сертификата. На телефоне бланк можно нажать — он раскроется во весь экран, повёрнутый по ширине.</p>
+  </section>
+
+  <!-- 4. ПЕЧАТЬ -->
+  <section id="print">
+    <h2 class="h2">4. Печать бланка
+      <small>Бланк свёрстан под альбомный лист A4 — печатается «как есть», подгонять ничего не нужно.</small>
+    </h2>
+    <p class="lead">Нажмите <b>«Распечатать / PDF»</b> на странице сертификата (или в студии — кнопка под предпросмотром).
+      Откроется обычное окно печати браузера.</p>
+    <div class="cards cards--3">
+      <div class="card"><h3>Ориентация</h3><p>Альбомная. Браузер подставит её сам, но если этого не произошло — выберите вручную.</p></div>
+      <div class="card"><h3>Фон</h3><p>Включите «Печать фона» (Background graphics). Без этого бланк напечатается белым, без фирменного тёмного фона.</p></div>
+      <div class="card"><h3>Поля</h3><p>Поставьте «Нет» / «Без полей», чтобы бланк занял весь лист.</p></div>
+    </div>
+    <div class="tip"><b>Нужен файл, а не бумага?</b> В окне печати выберите принтер <b>«Сохранить как PDF»</b> — получится готовый файл, который можно отправить или напечатать позже в типографии.</div>
+    <div class="tip"><b>Совет.</b> Печатайте на плотной бумаге от 160 г/м²: тёмный фон на тонком листе просвечивает.</div>
+  </section>
+
+  <!-- 5. ПРОВЕРКА -->
+  <section id="verify">
+    <h2 class="h2">5. Проверка подлинности
+      <small>Три способа убедиться, что сертификат настоящий.</small>
+    </h2>
+    <div class="cards cards--3">
+      <div class="card"><h3>По QR-коду</h3><p>На печатном бланке слева внизу есть QR. Наведите камеру телефона — откроется цифровой оригинал с отметкой подлинности.</p></div>
+      <div class="card"><h3>По номеру и имени</h3><p>Откройте страницу проверки, введите номер с бланка и имя владельца. Подходит, когда на руках только бумага.</p></div>
+      <div class="card"><h3>По ссылке</h3><p>Просто откройте ссылку: страница сама пересчитает подпись и покажет, подлинный сертификат или подделан.</p></div>
+    </div>
+
+    <div class="step step--split">
+      <figure>
+        <img class="shot" src="assets/img/guide/08-verify-form.jpg" alt="Форма проверки подлинности: номер сертификата и имя владельца">
+        <figcaption class="cap">Страница проверки: nespatmoskva.ru/certificate.html</figcaption>
+      </figure>
+      <figure>
+        <img class="shot shot--pad" src="assets/img/guide/09-verify-ok.jpg" alt="Результат проверки: сертификат подлинный">
+        <figcaption class="cap">Ответ системы при успешной проверке — звание, имя и месяц выдачи.</figcaption>
+      </figure>
+    </div>
+
+    <p class="lead">Проверка не придирается к мелочам: регистр букв, лишние пробелы и «е» вместо «ё» не помешают.
+      Но чужое имя или выдуманный номер система не подтвердит.</p>
+    <div class="warn"><b>Если ссылку изменили.</b> Стоит кому-то поправить в ссылке имя, звание или дату — сертификат откроется
+      с красной отметкой <b>«Подлинность не подтверждена»</b>. Подпись клуба перестаёт сходиться, подделать её, не зная ключа, нельзя.</div>
+  </section>
+
+  <!-- 6. ЗВАНИЯ -->
+  <section id="ranks">
+    <h2 class="h2">6. Все семь званий и их бланки
+      <small>У каждой ступени свой цвет, узор, эмблема и девиз — чтобы было видно рост.</small>
+    </h2>
+    <div class="ranks">
+      <figure class="rank">
+        <div class="rank__head"><span class="rank__num" style="background:#8b9099">I</span>
+          <span><span class="rank__name">Новобранец</span><br><span class="rank__for">За вступление в клуб</span></span></div>
+        <img src="assets/img/guide/rank-1.jpg" alt="Бланк сертификата звания Новобранец">
+      </figure>
+      <figure class="rank">
+        <div class="rank__head"><span class="rank__num" style="background:#e02b2b">II</span>
+          <span><span class="rank__name">Боец</span><br><span class="rank__for">10 тренировок</span></span></div>
+        <img src="assets/img/guide/rank-2.jpg" alt="Бланк сертификата звания Боец">
+      </figure>
+      <figure class="rank">
+        <div class="rank__head"><span class="rank__num" style="background:#9fb0c0">III</span>
+          <span><span class="rank__name">Железный</span><br><span class="rank__for">30 тренировок и нормативы</span></span></div>
+        <img src="assets/img/guide/rank-3.jpg" alt="Бланк сертификата звания Железный">
+      </figure>
+      <figure class="rank">
+        <div class="rank__head"><span class="rank__num" style="background:#4a8fb5">IV</span>
+          <span><span class="rank__name">Защитник</span><br><span class="rank__for">База самообороны</span></span></div>
+        <img src="assets/img/guide/rank-4.jpg" alt="Бланк сертификата звания Защитник">
+      </figure>
+      <figure class="rank">
+        <div class="rank__head"><span class="rank__num" style="background:#b03a4a">V</span>
+          <span><span class="rank__name">Страж</span><br><span class="rank__for">100 тренировок и события клуба</span></span></div>
+        <img src="assets/img/guide/rank-5.jpg" alt="Бланк сертификата звания Страж">
+      </figure>
+      <figure class="rank">
+        <div class="rank__head"><span class="rank__num" style="background:#c98a3c">VI</span>
+          <span><span class="rank__name">Наставник</span><br><span class="rank__for">Ведёт новичков</span></span></div>
+        <img src="assets/img/guide/rank-6.jpg" alt="Бланк сертификата звания Наставник">
+      </figure>
+      <figure class="rank">
+        <div class="rank__head"><span class="rank__num" style="background:#ffc93c">VII</span>
+          <span><span class="rank__name">Легенда «Не Спать»</span><br><span class="rank__for">Высшее звание клуба</span></span></div>
+        <img src="assets/img/guide/rank-7.jpg" alt="Бланк сертификата звания Легенда Не Спать">
+      </figure>
+    </div>
+  </section>
+
+  <!-- 7. ВОПРОСЫ -->
+  <section id="faq">
+    <h2 class="h2">7. Частые вопросы</h2>
+    <div class="qa">
+      <div class="qa__item"><p class="qa__q">Участник потерял ссылку. Что делать?</p>
+        <p class="qa__a">Выдайте сертификат заново с теми же данными — номер получится тот же самый, это тот же сертификат. Или найдите запись в списке «Выданные сертификаты» и скопируйте ссылку оттуда.</p></div>
+      <div class="qa__item"><p class="qa__q">Ошиблись в имени. Можно исправить?</p>
+        <p class="qa__a">Отредактировать выданный сертификат нельзя — имя защищено подписью. Просто выдайте новый с верным именем, а старую ссылку не отправляйте.</p></div>
+      <div class="qa__item"><p class="qa__q">Сколько сертификатов можно выдать?</p>
+        <p class="qa__a">Сколько угодно. Ни лимитов, ни оплаты: сертификат живёт в ссылке, сервер для него не нужен.</p></div>
+      <div class="qa__item"><p class="qa__q">Можно выдавать с телефона?</p>
+        <p class="qa__a">Да, студия работает и на телефоне: форма и предпросмотр подстраиваются под экран.</p></div>
+      <div class="qa__item"><p class="qa__q">Кто-то узнает пин-код — что будет?</p>
+        <p class="qa__a">Он сможет открыть студию и выпустить сертификат. Пин защищает от случайного посетителя, а не от взлома: сайт статический, и код лежит в исходниках страницы. Не публикуйте адрес студии и пин в открытых чатах.</p></div>
+      <div class="qa__item"><p class="qa__q">Можно ли подделать сертификат?</p>
+        <p class="qa__a">Переписать имя или звание в ссылке не выйдет — подпись сразу перестанет сходиться, и страница покажет «Подлинность не подтверждена». Полная защита от подготовленного специалиста потребовала бы сервера; для сертификатов клуба текущего уровня достаточно.</p></div>
+      <div class="qa__item"><p class="qa__q">Что нельзя менять в системе?</p>
+        <p class="qa__a">Ключ подписи в файле <b>assets/js/cert-core.js</b>. Если его изменить, все ранее выданные сертификаты перестанут подтверждаться. Об этом же предупреждает комментарий в самом файле.</p></div>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <p class="foot__note">Руководство к системе сертификатов клуба «НЕ СПАТЬ МОСКВА»<br>nespatmoskva.ru</p>
+    <a class="cover__by" href="https://futureflow.ru" target="_blank" rel="noopener">
+      <svg width="20" height="20" viewBox="0 0 32 32" fill="none" stroke="url(#ffg2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <defs><linearGradient id="ffg2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#c8dcf4"/><stop offset=".5" stop-color="#fff"/><stop offset="1" stop-color="#f5a623"/></linearGradient></defs>
+        <rect x="8" y="8" width="16" height="16" rx="2.5"/>
+        <path d="M12 8V4M16 8V4M20 8V4 M12 28V24M16 28V24M20 28V24 M8 12H4M8 16H4M8 20H4 M28 12H24M28 16H24M28 20H24"/>
+      </svg>
+      <span>Сделано в&nbsp;<b>FutureFlow</b></span>
+    </a>
+  </footer>
+</div>
+</body>
+</html>

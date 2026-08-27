@@ -66,8 +66,12 @@
     .top__links { display: flex; gap: 10px; flex-wrap: wrap; }
     .top__link { font-size: 13.5px; color: var(--c-text-dim); border-bottom: 1px solid transparent; }
     .top__link:hover { color: var(--c-text); border-color: var(--c-accent); }
+    .top__link--guide { color: var(--c-text); font-weight: 600; }
 
     .grid { display: grid; gap: 26px; align-items: start; }
+    /* без min-width:0 колонка не сжимается меньше содержимого предпросмотра
+       и на узких телефонах вылезает за экран */
+    .grid > * { min-width: 0; }
     @media (min-width: 1000px) { .grid { grid-template-columns: 380px 1fr; } }
 
     .panel { background: var(--c-surface); border: 1px solid var(--c-border); padding: 24px; }
@@ -105,6 +109,14 @@
     .out__actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
     .out__actions .btn { flex: 1 1 auto; }
     .note { font-size: 12.5px; color: #6d6a66; margin-top: 12px; }
+    .guidebox {
+      display: block; margin-top: 14px; padding: 13px 16px;
+      background: var(--c-bg); border: 1px solid var(--c-border); border-left: 3px solid var(--c-accent);
+      transition: border-color .2s, background .2s;
+    }
+    .guidebox:hover { background: #141416; border-left-color: var(--c-accent-hot); }
+    .guidebox__t { display: block; font-family: var(--font-display); text-transform: uppercase; font-size: 14px; letter-spacing: .04em; }
+    .guidebox__s { display: block; font-size: 12.5px; color: #6d6a66; margin-top: 3px; }
     .warn { color: var(--c-accent-hot); font-size: 13px; margin-top: 10px; min-height: 20px; }
 
     /* ---------- история ---------- */
@@ -118,8 +130,8 @@
       clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
     }
     .hitem__main { flex: 1; min-width: 0; }
-    .hitem__name { font-family: var(--font-display); text-transform: uppercase; font-size: 15px; letter-spacing: .04em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .hitem__meta { font-size: 12px; color: #6d6a66; }
+    .hitem__name { display: block; font-family: var(--font-display); text-transform: uppercase; font-size: 15px; letter-spacing: .04em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .hitem__meta { display: block; font-size: 12px; color: #6d6a66; line-height: 1.35; overflow-wrap: anywhere; }
     .hitem__acts { display: flex; gap: 6px; flex: 0 0 auto; }
     .icobtn {
       width: 34px; height: 34px; display: grid; place-items: center;
@@ -130,6 +142,17 @@
 
     .preview__head { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; margin-bottom: 14px; }
     .preview__hint { font-size: 12.5px; color: #6d6a66; }
+    /* очень узкие телефоны (320px): ужимаем отступы, номер и кнопки истории */
+    @media (max-width: 380px) {
+      .wrap { padding: 20px 14px 60px; }
+      .panel { padding: 18px 16px; }
+      .out__num { font-size: 18px; letter-spacing: .08em; }
+      .hitem { gap: 9px; }
+      .hitem__acts { gap: 4px; }
+      .icobtn { width: 30px; height: 30px; }
+      .out__actions .btn { width: 100%; }
+    }
+
     @media print { .no-print { display: none !important; } }
   </style>
 </head>
@@ -158,6 +181,7 @@
         <div class="top__title">Выдача сертификатов<span>НЕ СПАТЬ МОСКВА</span></div>
       </div>
       <nav class="top__links">
+        <a class="top__link top__link--guide" href="certificate-guide.html" target="_blank" rel="noopener">📘 Руководство</a>
         <a class="top__link" href="certificate.html" target="_blank" rel="noopener">Страница проверки</a>
         <a class="top__link" href="index.html" target="_blank" rel="noopener">Сайт клуба</a>
         <button class="top__link" id="lockBtn" type="button">Выйти</button>
@@ -187,6 +211,10 @@
             <textarea id="fNote" maxlength="120" placeholder="Например: за победу на турнире клуба"></textarea>
           </div>
           <p class="warn" id="warn"></p>
+          <a class="guidebox" href="certificate-guide.html" target="_blank" rel="noopener">
+            <span class="guidebox__t">Как это работает — пошаговое руководство</span>
+            <span class="guidebox__s">Со скриншотами и образцами всех семи бланков. Можно скачать в PDF.</span>
+          </a>
 
           <div class="out" id="out" hidden>
             <p class="out__label">Номер сертификата</p>
