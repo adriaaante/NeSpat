@@ -1,0 +1,269 @@
+/* Шрифты хостятся у нас: Google Fonts в РФ работает нестабильно,
+   а при его недоступности сайт терял фирменную гарнитуру.
+   Файлы вариативные (один на все начертания), вместе — 96 КБ. */
+@font-face {
+  font-family: "Oswald";
+  src: url("../fonts/oswald-cyrillic.woff2") format("woff2");
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: "Oswald";
+  src: url("../fonts/oswald-latin.woff2") format("woff2");
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Inter";
+  src: url("../fonts/inter-cyrillic.woff2") format("woff2");
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: "Inter";
+  src: url("../fonts/inter-latin.woff2") format("woff2");
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* Бланк сертификата клуба «НЕ СПАТЬ МОСКВА».
+   Используется и страницей просмотра, и предпросмотром в студии выдачи.
+   Размеры внутри бланка заданы в cqw — бланк целиком масштабируется под
+   контейнер (экран телефона, десктоп, лист A4 при печати) без пересчёта в JS. */
+
+.cert-wrap { container-type: inline-size; width: 100%; }
+
+.cert {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 297 / 210;              /* альбомный A4 */
+  overflow: hidden;
+  color: #f5f4f2;
+  background:
+    radial-gradient(120% 90% at 50% 0%, #1c1c20 0%, #121214 45%, #0a0a0b 100%);
+  font-family: var(--font-body, "Inter", system-ui, sans-serif);
+  --rank: #e02b2b;                      /* переопределяется классом звания */
+  --rank2: #ff6b5e;
+  --pattern: rgba(245, 244, 242, .05);
+  box-shadow: 0 30px 90px rgba(0, 0, 0, .55);
+  isolation: isolate;
+}
+
+/* Гильошь: тонкая сетка «под ценную бумагу», у каждого звания свой рисунок */
+.cert::before {
+  content: "";
+  position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  background-image:
+    repeating-linear-gradient(45deg, var(--pattern) 0 1px, transparent 1px 14px),
+    repeating-linear-gradient(-45deg, var(--pattern) 0 1px, transparent 1px 14px);
+}
+
+/* Свечение звания за эмблемой */
+.cert::after {
+  content: "";
+  position: absolute; z-index: 0; pointer-events: none;
+  width: 60cqw; height: 60cqw; left: 50%; top: 46%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, color-mix(in srgb, var(--rank) 22%, transparent) 0%, transparent 62%);
+}
+
+/* ---------- рамка ---------- */
+.cert__frame {
+  position: absolute; inset: 2.2cqw; z-index: 1;
+  border: 0.22cqw solid color-mix(in srgb, var(--rank) 55%, transparent);
+}
+.cert__frame::before {
+  content: "";
+  position: absolute; inset: 0.75cqw;
+  border: 0.08cqw solid color-mix(in srgb, var(--rank) 30%, transparent);
+}
+/* Угловые «шевроны» — фирменный элемент монограммы клуба */
+.cert__corner {
+  position: absolute; z-index: 2; width: 4.6cqw; height: 4.6cqw;
+  border: 0.35cqw solid var(--rank);
+}
+.cert__corner--tl { top: 1.4cqw; left: 1.4cqw; border-right: 0; border-bottom: 0; }
+.cert__corner--tr { top: 1.4cqw; right: 1.4cqw; border-left: 0; border-bottom: 0; }
+.cert__corner--bl { bottom: 1.4cqw; left: 1.4cqw; border-right: 0; border-top: 0; }
+.cert__corner--br { bottom: 1.4cqw; right: 1.4cqw; border-left: 0; border-top: 0; }
+
+/* ---------- содержимое ---------- */
+.cert__inner {
+  position: relative; z-index: 3;
+  height: 100%;
+  padding: 6cqw 7.5cqw 4.6cqw;
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+}
+
+.cert__head { display: flex; align-items: center; gap: 1.4cqw; }
+.cert__mark { width: 4.4cqw; height: auto; }
+.cert__club {
+  font-family: var(--font-display, "Oswald", sans-serif);
+  font-weight: 700; text-transform: uppercase;
+  font-size: 1.9cqw; letter-spacing: .32em; line-height: 1;
+}
+.cert__club em {
+  display: block; font-style: normal; color: var(--rank);
+  font-size: .62em; letter-spacing: .52em; margin-top: .35em;
+}
+
+.cert__title {
+  font-family: var(--font-display, "Oswald", sans-serif);
+  font-weight: 700; text-transform: uppercase;
+  font-size: 4.4cqw; letter-spacing: .28em; line-height: 1;
+  margin-top: 2.6cqw;
+  background: linear-gradient(180deg, #ffffff 0%, var(--rank2) 130%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.cert__rule {
+  width: 26cqw; height: 0.16cqw; margin: 1.5cqw 0 1.9cqw;
+  background: linear-gradient(90deg, transparent, var(--rank), transparent);
+}
+
+.cert__lead { font-size: 1.35cqw; color: #b6b3ae; letter-spacing: .12em; text-transform: uppercase; }
+
+.cert__name {
+  font-family: var(--font-display, "Oswald", sans-serif);
+  font-weight: 700; text-transform: uppercase;
+  font-size: 5.4cqw; line-height: 1.05; letter-spacing: .02em;
+  margin: 1.1cqw 0 .5cqw; max-width: 100%;
+  word-break: break-word;
+}
+.cert__name--long { font-size: 4.1cqw; }
+.cert__name--xlong { font-size: 3.2cqw; }
+.cert__name--xxlong { font-size: 2.5cqw; }
+.cert__underline { width: 46cqw; max-width: 100%; height: 0.1cqw; background: color-mix(in srgb, var(--rank) 45%, transparent); }
+
+.cert__awarded { font-size: 1.35cqw; color: #b6b3ae; letter-spacing: .12em; text-transform: uppercase; margin-top: 1.6cqw; }
+
+.cert__rankrow { display: flex; align-items: center; justify-content: center; gap: 2.4cqw; margin-top: 1cqw; }
+.cert__emblem { width: 9.4cqw; height: 9.4cqw; color: var(--rank); flex: 0 0 auto; }
+.cert__rankbox { text-align: left; }
+.cert__rankname {
+  font-family: var(--font-display, "Oswald", sans-serif);
+  font-weight: 700; text-transform: uppercase;
+  font-size: 4.6cqw; line-height: 1; color: var(--rank);
+  text-shadow: 0 0 3cqw color-mix(in srgb, var(--rank) 45%, transparent);
+}
+.cert__rankname--long { font-size: 3.4cqw; }
+.cert__roman {
+  font-family: var(--font-display, "Oswald", sans-serif);
+  font-size: 1.3cqw; letter-spacing: .5em; color: #b6b3ae; text-transform: uppercase;
+}
+
+.cert__reason { font-size: 1.5cqw; color: #d8d5d0; margin-top: 1.6cqw; max-width: 72cqw; }
+.cert__motto {
+  font-size: 1.35cqw; font-style: italic; color: color-mix(in srgb, var(--rank2) 75%, #ffffff);
+  margin-top: .7cqw; max-width: 72cqw;
+}
+.cert__note {
+  font-size: 1.2cqw; color: #b6b3ae; margin-top: .8cqw; max-width: 68cqw;
+}
+
+/* ---------- подвал бланка ---------- */
+.cert__footer {
+  margin-top: auto; width: 100%;
+  display: grid; grid-template-columns: auto 1fr auto; align-items: end; gap: 2cqw;
+  padding-top: 2cqw;
+}
+.cert__qr { width: 9.6cqw; height: 9.6cqw; background: #fff; padding: .45cqw; }
+.cert__qr svg { width: 100%; height: 100%; display: block; }
+.cert__qrcap { font-size: .82cqw; color: #6d6a66; letter-spacing: .06em; margin-top: .35cqw; text-align: center; }
+.cert__meta { text-align: center; }
+.cert__num {
+  font-family: var(--font-display, "Oswald", sans-serif);
+  font-size: 1.7cqw; letter-spacing: .16em; color: #f5f4f2;
+}
+.cert__numcap, .cert__date { font-size: 1.05cqw; color: #8a8781; letter-spacing: .08em; }
+.cert__numcap { text-transform: uppercase; margin-bottom: .2cqw; }
+.cert__date { margin-top: .5cqw; }
+.cert__verifyline { font-size: .92cqw; color: #6d6a66; margin-top: .55cqw; }
+
+/* Печать клуба */
+.cert__seal { position: relative; width: 11cqw; height: 11cqw; flex: 0 0 auto; }
+.cert__seal svg { width: 100%; height: 100%; color: var(--rank); }
+
+/* ---------- индивидуальность каждого звания ---------- */
+.cert--r1 { --rank: #8b9099; --rank2: #c3c8d0; }
+.cert--r1::before { background-image: repeating-linear-gradient(90deg, var(--pattern) 0 1px, transparent 1px 16px); }
+
+.cert--r2 { --rank: #e02b2b; --rank2: #ff6b5e; }
+
+.cert--r3 { --rank: #9fb0c0; --rank2: #e8f0f7; --pattern: rgba(245, 244, 242, .07); }
+.cert--r3::before {
+  background-image:
+    repeating-linear-gradient(0deg, var(--pattern) 0 1px, transparent 1px 9px),
+    repeating-linear-gradient(90deg, var(--pattern) 0 1px, transparent 1px 9px);
+}
+
+.cert--r4 { --rank: #4a8fb5; --rank2: #9ed6f0; }
+.cert--r4::before {
+  background-image: repeating-linear-gradient(135deg, var(--pattern) 0 1px, transparent 1px 12px);
+}
+
+.cert--r5 { --rank: #b03a4a; --rank2: #ef7f8c; }
+.cert--r5::before {
+  background-image:
+    repeating-linear-gradient(45deg, var(--pattern) 0 2px, transparent 2px 18px),
+    repeating-linear-gradient(-45deg, var(--pattern) 0 2px, transparent 2px 18px);
+}
+
+.cert--r6 { --rank: #c98a3c; --rank2: #f0c98a; --pattern: rgba(240, 201, 138, .07); }
+.cert--r6::before {
+  background-image:
+    repeating-linear-gradient(30deg, var(--pattern) 0 1px, transparent 1px 15px),
+    repeating-linear-gradient(-30deg, var(--pattern) 0 1px, transparent 1px 15px);
+}
+
+/* Легенда — самый богатый бланк: золото, двойная рамка, плотная гильошь */
+.cert--r7 { --rank: #ffc93c; --rank2: #fff0b8; --pattern: rgba(255, 201, 60, .09); }
+.cert--r7 .cert__frame { border-width: 0.34cqw; }
+.cert--r7 .cert__frame::before { inset: 0.55cqw; border-width: 0.12cqw; }
+.cert--r7::before {
+  background-image:
+    repeating-linear-gradient(45deg, var(--pattern) 0 1px, transparent 1px 10px),
+    repeating-linear-gradient(-45deg, var(--pattern) 0 1px, transparent 1px 10px),
+    repeating-linear-gradient(0deg, rgba(255, 201, 60, .04) 0 1px, transparent 1px 20px);
+}
+.cert--r7 .cert__title { background: linear-gradient(180deg, #fff8e0 0%, #ffc93c 120%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+/* ---------- печать ---------- */
+@page { size: A4 landscape; margin: 0; }
+
+@media print {
+  html, body { background: #fff !important; margin: 0 !important; padding: 0 !important; }
+  body * { visibility: hidden !important; }
+  .cert-print, .cert-print * { visibility: visible !important; }
+  .cert-print {
+    position: absolute !important; inset: 0 !important;
+    width: 297mm !important; height: 210mm !important;
+    margin: 0 !important; padding: 0 !important;
+    box-shadow: none !important;
+  }
+  .cert-print .cert {
+    width: 297mm !important; height: 210mm !important; aspect-ratio: auto !important;
+    box-shadow: none !important;
+    /* фон и цвета обязаны печататься — иначе бланк уедет в белое поле */
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  .no-print { display: none !important; }
+
+  /* Градиентный текст (background-clip: text) при печати даёт полосы вокруг
+     заголовка — на бумаге печатаем его сплошным цветом. */
+  .cert-print .cert__title {
+    background: none !important;
+    -webkit-background-clip: border-box !important;
+    background-clip: border-box !important;
+    color: #ffffff !important;
+  }
+  .cert-print .cert--r7 .cert__title { color: #ffd75e !important; }
+}

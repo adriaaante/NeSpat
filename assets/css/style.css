@@ -397,6 +397,28 @@ button { font: inherit; background: none; border: 0; color: inherit; cursor: poi
 .bigvideo__play svg { width: 74px; height: 74px; padding: 20px; box-sizing: border-box; border-radius: 50%; background: rgba(224, 43, 43, .92); transition: transform .25s, background .25s; }
 .bigvideo__play:hover svg { transform: scale(1.1); background: var(--c-accent-hot); }
 
+/* ---------- Сертификаты: блок в секции званий ---------- */
+.certnote {
+  display: grid; gap: 18px; align-items: center; margin-bottom: 34px;
+  background: var(--c-surface); border: 1px solid var(--c-border);
+  border-left: 3px solid var(--c-accent); padding: 22px 24px;
+}
+@media (min-width: 880px) { .certnote { grid-template-columns: auto 1fr auto; } }
+.certnote__icon {
+  width: 46px; height: 46px; display: grid; place-items: center;
+  background: rgba(224, 43, 43, .12); color: var(--c-accent-hot);
+}
+.certnote__icon svg { width: 24px; height: 24px; }
+.certnote__text h3 {
+  font-family: var(--font-display); text-transform: uppercase; font-size: 17px;
+  letter-spacing: .04em; margin-bottom: 6px;
+}
+.certnote__text p { color: var(--c-text-dim); font-size: 14.5px; }
+.certnote__btn { white-space: nowrap; }
+
+.footer__certlink { font-size: 13px; color: var(--c-text-dim); border-bottom: 1px solid transparent; transition: color .2s, border-color .2s; }
+.footer__certlink:hover, .footer__certlink:focus-visible { color: var(--c-text); border-color: var(--c-accent); }
+
 /* ---------- Reviews (карусель) ---------- */
 .reviews { background: var(--c-bg-2); }
 .reviews__shell { position: relative; margin-top: 44px; display: flex; align-items: stretch; gap: 10px; }

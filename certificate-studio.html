@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Выдача сертификатов — НЕ СПАТЬ МОСКВА</title>
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#0a0a0b">
+  <link rel="icon" href="assets/img/favicon.png" type="image/png">
+  <link rel="stylesheet" href="assets/css/certificate.css">
+  <style>
+    :root {
+      --c-bg: #0a0a0b; --c-bg-2: #121214; --c-surface: #1a1a1d;
+      --c-text: #f5f4f2; --c-text-dim: #b6b3ae; --c-accent: #e02b2b; --c-accent-hot: #ff3b3b;
+      --c-border: #2a2a2e; --c-ok: #58d68d;
+      --font-display: "Oswald", "Arial Narrow", sans-serif;
+      --font-body: "Inter", system-ui, sans-serif;
+      --ease-out: cubic-bezier(.22, 1, .36, 1);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    [hidden] { display: none !important; }
+    body { background: var(--c-bg); color: var(--c-text); font-family: var(--font-body); line-height: 1.6; -webkit-font-smoothing: antialiased; min-height: 100svh; }
+    img, svg { display: block; max-width: 100%; }
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; background: none; border: 0; color: inherit; cursor: pointer; touch-action: manipulation; }
+    input, textarea, select { font: inherit; }
+    :focus-visible { outline: 2px solid var(--c-accent-hot); outline-offset: 3px; }
+    .wrap { max-width: 1240px; margin-inline: auto; padding: 26px 20px 70px; }
+
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+      font-family: var(--font-display); font-weight: 600; font-size: 14.5px;
+      text-transform: uppercase; letter-spacing: .07em; padding: 14px 26px;
+      clip-path: polygon(9px 0, 100% 0, calc(100% - 9px) 100%, 0 100%);
+      transition: transform .2s, background .2s;
+    }
+    .btn--primary { background: var(--c-accent); color: #fff; }
+    .btn--primary:hover { background: var(--c-accent-hot); transform: translateY(-2px); }
+    .btn--ghost { background: rgba(245,244,242,.08); color: var(--c-text); outline: 1px solid rgba(245,244,242,.22); outline-offset: -1px; }
+    .btn--ghost:hover { background: rgba(245,244,242,.16); transform: translateY(-2px); }
+    .btn--tg { background: #2aabee; color: #fff; }
+    .btn--tg:hover { background: #45b8f2; transform: translateY(-2px); }
+    .btn svg { width: 17px; height: 17px; }
+
+    /* ---------- вход по пин-коду ---------- */
+    .gate { min-height: 100svh; display: grid; place-items: center; padding: 24px; }
+    .gate__box { width: min(400px, 100%); text-align: center; }
+    .gate__mark { width: 74px; margin: 0 auto 20px; }
+    .gate__title { font-family: var(--font-display); font-weight: 700; text-transform: uppercase; font-size: 26px; letter-spacing: .06em; }
+    .gate__lead { color: var(--c-text-dim); font-size: 14.5px; margin: 10px 0 26px; }
+    .gate__input {
+      width: 100%; text-align: center; letter-spacing: .6em; font-size: 26px; padding: 16px;
+      font-family: var(--font-display); color: var(--c-text);
+      background: var(--c-bg-2); border: 1px solid var(--c-border);
+    }
+    .gate__input:focus { outline: none; border-color: var(--c-accent); box-shadow: 0 0 0 3px rgba(224,43,43,.18); }
+    .gate__err { color: var(--c-accent-hot); font-size: 14px; min-height: 22px; margin-top: 12px; }
+    .gate .btn { width: 100%; margin-top: 8px; }
+
+    /* ---------- шапка студии ---------- */
+    .top { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 26px; }
+    .top__brand { display: flex; align-items: center; gap: 12px; }
+    .top__mark { width: 34px; }
+    .top__title { font-family: var(--font-display); font-weight: 700; text-transform: uppercase; letter-spacing: .06em; font-size: 19px; line-height: 1.1; }
+    .top__title span { display: block; font-size: 11px; letter-spacing: .3em; color: var(--c-accent-hot); }
+    .top__links { display: flex; gap: 10px; flex-wrap: wrap; }
+    .top__link { font-size: 13.5px; color: var(--c-text-dim); border-bottom: 1px solid transparent; }
+    .top__link:hover { color: var(--c-text); border-color: var(--c-accent); }
+
+    .grid { display: grid; gap: 26px; align-items: start; }
+    @media (min-width: 1000px) { .grid { grid-template-columns: 380px 1fr; } }
+
+    .panel { background: var(--c-surface); border: 1px solid var(--c-border); padding: 24px; }
+    .panel__title { font-family: var(--font-display); text-transform: uppercase; font-size: 17px; letter-spacing: .06em; margin-bottom: 18px; }
+
+    .field { margin-bottom: 16px; }
+    .field label { display: block; font-size: 11.5px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--c-text-dim); margin-bottom: 7px; }
+    .field input, .field textarea {
+      width: 100%; padding: 13px 15px; color: var(--c-text);
+      background: var(--c-bg); border: 1px solid var(--c-border); transition: border-color .2s, box-shadow .2s;
+    }
+    .field textarea { resize: vertical; min-height: 62px; }
+    .field input:focus, .field textarea:focus { outline: none; border-color: var(--c-accent); box-shadow: 0 0 0 3px rgba(224,43,43,.18); }
+    .field input::placeholder, .field textarea::placeholder { color: #5d5a56; }
+    .field__hint { font-size: 12px; color: #6d6a66; margin-top: 6px; }
+
+    .ranks { display: grid; grid-template-columns: repeat(auto-fill, minmax(105px, 1fr)); gap: 8px; }
+    .rankbtn {
+      padding: 11px 8px; text-align: center; border: 1px solid var(--c-border); background: var(--c-bg);
+      transition: border-color .2s, background .2s, transform .2s;
+    }
+    .rankbtn:hover { transform: translateY(-2px); }
+    .rankbtn__roman { display: block; font-family: var(--font-display); font-size: 11px; letter-spacing: .2em; color: #6d6a66; }
+    .rankbtn__name { display: block; font-family: var(--font-display); text-transform: uppercase; font-size: 13.5px; line-height: 1.2; margin-top: 2px; }
+    .rankbtn.is-on { border-color: var(--pick, var(--c-accent)); background: color-mix(in srgb, var(--pick, var(--c-accent)) 14%, transparent); }
+    .rankbtn.is-on .rankbtn__name { color: var(--pick, var(--c-accent-hot)); }
+
+    .out { margin-top: 20px; }
+    .out__label { font-size: 11.5px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--c-text-dim); margin-bottom: 7px; }
+    .out__link {
+      background: var(--c-bg); border: 1px solid var(--c-border); padding: 12px 14px;
+      font-size: 12.5px; word-break: break-all; color: var(--c-text-dim); max-height: 92px; overflow: auto;
+    }
+    .out__num { font-family: var(--font-display); font-size: 21px; letter-spacing: .14em; color: var(--c-text); }
+    .out__actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+    .out__actions .btn { flex: 1 1 auto; }
+    .note { font-size: 12.5px; color: #6d6a66; margin-top: 12px; }
+    .warn { color: var(--c-accent-hot); font-size: 13px; margin-top: 10px; min-height: 20px; }
+
+    /* ---------- история ---------- */
+    .hist { margin-top: 26px; }
+    .hist__empty { color: #6d6a66; font-size: 14px; }
+    .hitem { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--c-border); }
+    .hitem:last-child { border-bottom: 0; }
+    .hitem__badge {
+      flex: 0 0 34px; width: 34px; height: 34px; display: grid; place-items: center;
+      font-family: var(--font-display); font-size: 13px; color: var(--c-bg);
+      clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+    }
+    .hitem__main { flex: 1; min-width: 0; }
+    .hitem__name { font-family: var(--font-display); text-transform: uppercase; font-size: 15px; letter-spacing: .04em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .hitem__meta { font-size: 12px; color: #6d6a66; }
+    .hitem__acts { display: flex; gap: 6px; flex: 0 0 auto; }
+    .icobtn {
+      width: 34px; height: 34px; display: grid; place-items: center;
+      border: 1px solid var(--c-border); color: var(--c-text-dim); transition: color .2s, border-color .2s;
+    }
+    .icobtn:hover { color: var(--c-text); border-color: var(--c-accent); }
+    .icobtn svg { width: 16px; height: 16px; }
+
+    .preview__head { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; margin-bottom: 14px; }
+    .preview__hint { font-size: 12.5px; color: #6d6a66; }
+    @media print { .no-print { display: none !important; } }
+  </style>
+</head>
+<body>
+
+  <!-- ======= ВХОД ======= -->
+  <section class="gate no-print" id="gate">
+    <div class="gate__box">
+      <img class="gate__mark" src="assets/img/monogram.png" alt="">
+      <h1 class="gate__title">Выдача сертификатов</h1>
+      <p class="gate__lead">Закрытый раздел клуба «НЕ СПАТЬ МОСКВА». Введите пин-код.</p>
+      <form id="gateForm">
+        <input class="gate__input" id="pin" type="password" inputmode="numeric" autocomplete="off"
+               maxlength="8" placeholder="••••" aria-label="Пин-код">
+        <p class="gate__err" id="gateErr"></p>
+        <button class="btn btn--primary" type="submit">Войти</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- ======= СТУДИЯ ======= -->
+  <div class="wrap" id="studio" hidden>
+    <header class="top no-print">
+      <div class="top__brand">
+        <img class="top__mark" src="assets/img/monogram.png" alt="">
+        <div class="top__title">Выдача сертификатов<span>НЕ СПАТЬ МОСКВА</span></div>
+      </div>
+      <nav class="top__links">
+        <a class="top__link" href="certificate.html" target="_blank" rel="noopener">Страница проверки</a>
+        <a class="top__link" href="index.html" target="_blank" rel="noopener">Сайт клуба</a>
+        <button class="top__link" id="lockBtn" type="button">Выйти</button>
+      </nav>
+    </header>
+
+    <div class="grid">
+      <!-- левая колонка: форма -->
+      <div>
+        <section class="panel no-print">
+          <h2 class="panel__title">Кому выдаём</h2>
+          <div class="field">
+            <label for="fName">Имя и фамилия участника</label>
+            <input type="text" id="fName" placeholder="Пётр Иванов" autocomplete="off" maxlength="60">
+            <p class="field__hint">Как будет напечатано на бланке. Имя входит в подпись — потом его не изменить.</p>
+          </div>
+          <div class="field">
+            <label>Звание</label>
+            <div class="ranks" id="rankPick"></div>
+          </div>
+          <div class="field">
+            <label for="fDate">Дата выдачи</label>
+            <input type="date" id="fDate">
+          </div>
+          <div class="field">
+            <label for="fNote">Комментарий (необязательно)</label>
+            <textarea id="fNote" maxlength="120" placeholder="Например: за победу на турнире клуба"></textarea>
+          </div>
+          <p class="warn" id="warn"></p>
+
+          <div class="out" id="out" hidden>
+            <p class="out__label">Номер сертификата</p>
+            <p class="out__num" id="outNum"></p>
+            <p class="out__label" style="margin-top:14px">Ссылка для участника</p>
+            <div class="out__link" id="outLink"></div>
+            <div class="out__actions">
+              <button class="btn btn--primary" id="copyBtn" type="button">Скопировать ссылку</button>
+              <a class="btn btn--tg" id="tgBtn" target="_blank" rel="noopener">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M21.9 4.6 19 19.3c-.2 1-.8 1.2-1.6.8l-4.5-3.3-2.2 2.1c-.24.24-.44.44-.9.44l.32-4.6L18.6 7.2c.37-.32-.08-.5-.56-.18L7.7 13.5 3.2 12c-1-.32-1-1 .2-1.5l17.2-6.6c.8-.3 1.5.2 1.3 1.4Z"/></svg>
+                Отправить
+              </a>
+              <a class="btn btn--ghost" id="openBtn" target="_blank" rel="noopener">Открыть</a>
+            </div>
+            <p class="note">Ссылка самодостаточна: сертификат в ней подписан и открывается у любого, кому её передадут.</p>
+          </div>
+        </section>
+
+        <section class="panel hist no-print">
+          <h2 class="panel__title">Выданные сертификаты</h2>
+          <div id="histBox"><p class="hist__empty">Пока пусто. Выданные сертификаты появятся здесь.</p></div>
+          <p class="note">История хранится в этом браузере. Ссылку участнику лучше сразу отправить — она не восстанавливается с другого устройства, но её всегда можно выдать заново с теми же данными: номер получится тот же.</p>
+        </section>
+      </div>
+
+      <!-- правая колонка: предпросмотр -->
+      <div>
+        <div class="preview__head no-print">
+          <h2 class="panel__title" style="margin:0">Предпросмотр бланка</h2>
+          <span class="preview__hint">так сертификат увидит участник и так он напечатается</span>
+        </div>
+        <div class="cert-print" id="previewCard">
+          <div class="cert-wrap" id="previewBox"></div>
+        </div>
+        <div class="out__actions no-print" style="margin-top:16px">
+          <button class="btn btn--ghost" id="printBtn" type="button">Распечатать / PDF</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="assets/js/cert-core.js"></script>
+  <script src="assets/js/qr.js"></script>
+  <script src="assets/js/cert-render.js"></script>
+  <script>
+  (function () {
+    "use strict";
+    var C = window.NespatCert, R = window.NespatCertRender;
+
+    /* Пин-код клуба. Защита символическая: сайт статический, поэтому код виден
+       в исходниках страницы. Она отсекает случайных посетителей, а не взлом. */
+    var PIN = atob("MTIzNA==");                 /* 1234 */
+    var SESSION_KEY = "nsm_cert_studio_open";
+    var HISTORY_KEY = "nsm_cert_history";
+
+    var gate = document.getElementById("gate");
+    var studio = document.getElementById("studio");
+
+    function unlock() {
+      gate.hidden = true;
+      studio.hidden = false;
+      try { sessionStorage.setItem(SESSION_KEY, "1"); } catch (e) {}
+      init();
+    }
+    try { if (sessionStorage.getItem(SESSION_KEY) === "1") unlock(); } catch (e) {}
+
+    document.getElementById("gateForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+      var val = document.getElementById("pin").value.trim();
+      if (val === PIN) { document.getElementById("gateErr").textContent = ""; unlock(); }
+      else {
+        document.getElementById("gateErr").textContent = "Неверный пин-код";
+        document.getElementById("pin").value = "";
+        document.getElementById("pin").focus();
+      }
+    });
+
+    var started = false;
+    function init() {
+      if (started) return;
+      started = true;
+
+      var state = { name: "", rank: 1, date: C.today(), note: "" };
+      var fName = document.getElementById("fName");
+      var fDate = document.getElementById("fDate");
+      var fNote = document.getElementById("fNote");
+      var warn = document.getElementById("warn");
+      var out = document.getElementById("out");
+      fDate.value = state.date;
+
+      /* выбор звания */
+      var pick = document.getElementById("rankPick");
+      pick.innerHTML = C.RANKS.map(function (r) {
+        return '<button type="button" class="rankbtn" data-rank="' + r.id + '" style="--pick:' + r.accent + '">' +
+          '<span class="rankbtn__roman">' + r.roman + '</span>' +
+          '<span class="rankbtn__name">' + r.name.replace(" «Не Спать»", "") + '</span></button>';
+      }).join("");
+      pick.addEventListener("click", function (e) {
+        var b = e.target.closest(".rankbtn");
+        if (!b) return;
+        state.rank = Number(b.dataset.rank);
+        markRank();
+        update();
+      });
+      function markRank() {
+        [].forEach.call(pick.querySelectorAll(".rankbtn"), function (b) {
+          b.classList.toggle("is-on", Number(b.dataset.rank) === state.rank);
+        });
+      }
+      markRank();
+
+      fName.addEventListener("input", function () { state.name = fName.value; update(); });
+      fDate.addEventListener("change", function () { state.date = fDate.value || C.today(); update(); });
+      fNote.addEventListener("input", function () { state.note = fNote.value; update(); });
+
+      function viewerBase() {
+        return location.href.split(/[?#]/)[0].replace(/certificate-studio\.html$/, "certificate.html");
+      }
+
+      var current = null, currentUrl = "";
+
+      function update() {
+        var name = state.name.replace(/\s+/g, " ").trim();
+        var preview = C.build(name || "Имя участника", state.rank, state.date, state.note);
+        var url = viewerBase() + "#" + C.encodePayload(preview);
+
+        R.render(document.getElementById("previewBox"), preview, { url: url });
+
+        if (!name) {
+          out.hidden = true;
+          warn.textContent = "Впишите имя участника — тогда появится ссылка на сертификат.";
+          current = null; currentUrl = "";
+          return;
+        }
+        warn.textContent = "";
+        current = preview; currentUrl = url;
+        out.hidden = false;
+        document.getElementById("outNum").textContent = preview.k;
+        document.getElementById("outLink").textContent = url;
+        document.getElementById("openBtn").href = url;
+        document.getElementById("tgBtn").href = "https://t.me/share/url?url=" + encodeURIComponent(url) +
+          "&text=" + encodeURIComponent("Твой сертификат клуба «НЕ СПАТЬ МОСКВА»: звание «" +
+            C.rankById(preview.r).name + "». Поздравляем!");
+        remember(preview, url);
+      }
+
+      /* ---------- история ---------- */
+      function loadHist() {
+        try { return JSON.parse(localStorage.getItem(HISTORY_KEY)) || []; } catch (e) { return []; }
+      }
+      function saveHist(list) {
+        try { localStorage.setItem(HISTORY_KEY, JSON.stringify(list.slice(0, 200))); } catch (e) {}
+      }
+      var rememberTimer = null;
+      function remember(cert, url) {
+        /* пишем не на каждую букву, а когда человек перестал печатать */
+        clearTimeout(rememberTimer);
+        rememberTimer = setTimeout(function () {
+          var list = loadHist();
+          if (list.some(function (h) { return h.k === cert.k; })) return;
+          list.unshift({ k: cert.k, n: cert.n, r: cert.r, d: cert.d, u: url });
+          saveHist(list);
+          drawHist();
+        }, 1200);
+      }
+      function drawHist() {
+        var list = loadHist(), box = document.getElementById("histBox");
+        if (!list.length) {
+          box.innerHTML = '<p class="hist__empty">Пока пусто. Выданные сертификаты появятся здесь.</p>';
+          return;
+        }
+        box.innerHTML = list.map(function (h, i) {
+          var r = C.rankById(h.r) || C.RANKS[0];
+          return '<div class="hitem">' +
+            '<span class="hitem__badge" style="background:' + r.accent + '">' + r.roman + '</span>' +
+            '<span class="hitem__main"><span class="hitem__name">' + escapeHtml(h.n) + '</span>' +
+            '<span class="hitem__meta">' + r.name + ' · ' + h.k + ' · ' + C.formatDate(h.d) + '</span></span>' +
+            '<span class="hitem__acts">' +
+              '<button class="icobtn" type="button" data-copy="' + i + '" title="Скопировать ссылку" aria-label="Скопировать ссылку">' +
+                '<svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" d="M9 9h11v11H9zM5 15H4V4h11v1"/></svg></button>' +
+              '<a class="icobtn" href="' + escapeHtml(h.u) + '" target="_blank" rel="noopener" title="Открыть" aria-label="Открыть">' +
+                '<svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M13 5h6v6M19 5l-9 9M18 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4"/></svg></a>' +
+              '<button class="icobtn" type="button" data-del="' + i + '" title="Убрать из истории" aria-label="Убрать из истории">' +
+                '<svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M5 5l14 14M19 5 5 19"/></svg></button>' +
+            '</span></div>';
+        }).join("");
+      }
+      document.getElementById("histBox").addEventListener("click", function (e) {
+        var copyBtn = e.target.closest("[data-copy]");
+        var delBtn = e.target.closest("[data-del]");
+        var list = loadHist();
+        if (copyBtn) {
+          var item = list[Number(copyBtn.dataset.copy)];
+          if (item) copyText(item.u, copyBtn);
+        } else if (delBtn) {
+          list.splice(Number(delBtn.dataset.del), 1);
+          saveHist(list);
+          drawHist();
+        }
+      });
+      function escapeHtml(s) {
+        return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+      }
+      drawHist();
+
+      /* ---------- копирование ---------- */
+      function copyText(text, btn) {
+        var flash = function () {
+          if (!btn) return;
+          var old = btn.innerHTML;
+          btn.textContent = "Готово";
+          setTimeout(function () { btn.innerHTML = old; }, 1600);
+        };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(flash, manual);
+        } else manual();
+        function manual() {
+          var ta = document.createElement("textarea");
+          ta.value = text; ta.setAttribute("readonly", "");
+          ta.style.position = "fixed"; ta.style.opacity = "0";
+          document.body.appendChild(ta); ta.select();
+          try { document.execCommand("copy"); flash(); } catch (e) { window.prompt("Скопируйте ссылку:", text); }
+          document.body.removeChild(ta);
+        }
+      }
+      document.getElementById("copyBtn").addEventListener("click", function () {
+        if (currentUrl) copyText(currentUrl, this);
+      });
+      document.getElementById("printBtn").addEventListener("click", function () { window.print(); });
+      document.getElementById("lockBtn").addEventListener("click", function () {
+        try { sessionStorage.removeItem(SESSION_KEY); } catch (e) {}
+        location.reload();
+      });
+
+      update();
+    }
+  })();
+  </script>
+</body>
+</html>
