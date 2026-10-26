@@ -170,11 +170,13 @@
     events: '<path d="M7 3v3M17 3v3M4 9h16M5 5h14a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Z"/>',
     people: '<circle cx="9" cy="8" r="3.2"/><path d="M3 19c.6-3.3 3-5 6-5s5.4 1.7 6 5"/><path d="M15.5 5.2a3 3 0 0 1 0 5.6M17.5 14.3c1.8.6 3 2.2 3.5 4.7"/>',
     stats: '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
+    certs: '<circle cx="12" cy="14" r="6"/><path d="M8.5 3h7l-2 5.5h-3L8.5 3ZM12 11.5v5M9.8 14h4.4"/>',
     team: '<path d="M12 3 4 6v6c0 4.4 3.3 7.8 8 9 4.7-1.2 8-4.6 8-9V6l-8-3Z"/>',
   };
   function shell(active, html) {
     var c = S.can;
     var items = [["events", "#/", "Мероприятия", "События"], ["people", "#/people", "Участники", "Участники"]];
+    if (c.certs) items.push(["certs", "#/certs", "Сертификаты", "Звания"]);
     if (c.stats) items.push(["stats", "#/stats", "Сводка", "Сводка"]);
     if (c.team) items.push(["team", "#/team", "Команда", "Команда"]);
     app.innerHTML =
@@ -209,6 +211,7 @@
     if ((m = h.match(/^event\/(\d+)/))) return viewEvent(+m[1]);
     if ((m = h.match(/^person\/(\d+)/))) return viewPerson(+m[1]);
     if (h === "people") return viewPeople();
+    if (h === "certs" && S.can.certs) return viewCerts();
     if (h === "stats" && S.can.stats) return viewStats(30);
     if (h === "team" && S.can.team) return viewTeam();
     if (h === "me") return viewMe();
@@ -240,7 +243,7 @@
     menuEl = document.createElement("div");
     menuEl.className = "menu";
     menuEl.innerHTML = items.map(function (it, i) {
-      return it.href ? '<a href="' + esc(it.href) + '"' + (it.cls ? ' class="' + it.cls + '"' : "") + ">" + esc(it.label) + "</a>"
+      return it.href ? '<a href="' + esc(it.href) + '"' + (/^https?:/.test(it.href) ? ' target="_blank" rel="noopener"' : "") + (it.cls ? ' class="' + it.cls + '"' : "") + ">" + esc(it.label) + "</a>"
         : '<button type="button" data-i="' + i + '"' + (it.cls ? ' class="' + it.cls + '"' : "") + ">" + esc(it.label) + "</button>";
     }).join("");
     document.body.appendChild(menuEl);
@@ -539,7 +542,8 @@
         (!S.pq && S.pf === "all" ? "Участники появятся сами, когда начнут записываться по ссылке, или когда вы отметите их на мероприятии." : "") + "</div>";
       if (!full && document.getElementById("plist")) { document.getElementById("plist").innerHTML = listHtml; return; }
       shell("people",
-        '<div class="head"><h1>Участники</h1>' + (S.can.export ? '<a class="btn ghost small" href="api.php?a=csv&what=people">Выгрузить (Excel)</a>' : "") + "</div>" +
+        '<div class="head"><h1>Участники</h1><div class="row">' + (S.can.export ? '<a class="btn ghost small" href="api.php?a=csv&what=people">Выгрузить (Excel)</a>' : "") +
+        '<button type="button" class="btn small" id="pAdd" data-tour="person-new">+ Участник</button></div></div>' +
         '<input type="search" class="search" id="pq" data-tour="search" placeholder="Имя или телефон" value="' + esc(S.pq) + '">' +
         '<div class="tabs" id="pf" data-tour="ready">' + PF.map(function (f) { return '<button type="button" data-f="' + f[0] + '" class="' + (S.pf === f[0] ? "on" : "") + '">' + f[1] + "</button>"; }).join("") + "</div>" +
         '<div class="plist" id="plist" data-tour="plist">' + listHtml + "</div>" +
@@ -547,6 +551,7 @@
       var q = document.getElementById("pq"), t = null;
       q.oninput = function () { clearTimeout(t); t = setTimeout(function () { S.pq = q.value.trim(); loadPeople(false); }, 250); };
       document.getElementById("pf").onclick = function (e) { var b = e.target.closest("button"); if (b) { S.pf = b.getAttribute("data-f"); loadPeople(true); } };
+      document.getElementById("pAdd").onclick = personAddModal;
     }).catch(fail);
   }
   function personRow(p) {
@@ -559,7 +564,7 @@
   }
   function viewPerson(id) {
     shell("people", '<div class="empty">Загружаю…</div>');
-    api("person", null, "&id=" + id).then(function (d) { drawPerson(d); maybeTour("person"); }).catch(fail);
+    api("person", null, "&id=" + id).then(function (d) { var auto = S.openCert === +id; drawPerson(d); if (!auto) maybeTour("person"); }).catch(fail);
   }
   function drawPerson(d) {
     var p = d.person, R = S.dict.ranks, rank = +p.rank, visits = +p.visits;
@@ -592,6 +597,7 @@
     shell("people", html);
     var pe = document.getElementById("pEdit"); if (pe) pe.onclick = function () { personModal(p); };
     var pc = document.getElementById("pCert"); if (pc) pc.onclick = function () { certModal(p); };
+    if (S.openCert === +p.id && pc) { S.openCert = null; certModal(p); }
   }
   function personModal(p) {
     modal("<h2>Участник</h2><form id=\"pf2\" class=\"stack\">" +
@@ -607,15 +613,66 @@
         };
       });
   }
+  // поле «телефон + имя» с подсказкой из базы — в окне выдачи и при добавлении участника
+  function whoFields(tour) {
+    return '<div class="grid2 who"' + (tour ? ' data-tour="' + tour + '"' : "") + ' style="position:relative">' +
+      '<label class="f">Телефон<input type="tel" id="w_phone" placeholder="+7 (___) ___-__-__" autocomplete="off"></label>' +
+      '<label class="f">Имя и фамилия<input type="text" id="w_name" maxlength="80" placeholder="Как в сертификате" autocomplete="off"></label>' +
+      '<div class="sugg" id="w_sugg" hidden></div></div>';
+  }
+  function wireWho(m, onPick) {
+    var ph = m.querySelector("#w_phone"), nm = m.querySelector("#w_name"), box = m.querySelector("#w_sugg"), t = null;
+    maskPhone(ph);
+    function find(q) {
+      clearTimeout(t);
+      if (q.replace(/\s/g, "").length < 2) { box.hidden = true; return; }
+      t = setTimeout(function () {
+        api("person_find", null, "&q=" + encodeURIComponent(q)).then(function (d) {
+          box.hidden = !d.people.length;
+          box.innerHTML = d.people.map(function (p) {
+            return '<button type="button" data-id="' + p.id + '" data-ph="' + esc(p.phone) + '" data-nm="' + esc(p.name) + '" data-rk="' + (+p.rank) + '"><span><b>' + esc(p.name) + '</b> <span class="muted small">' + esc(fmtPhone(p.phone)) + "</span></span>" +
+              '<span class="chip' + (+p.rank ? " rank" : "") + '">' + esc(rankName(+p.rank)) + "</span></button>";
+          }).join("");
+        }).catch(function () {});
+      }, 250);
+    }
+    ph.addEventListener("input", function () { onPick(null); find(ph.value.replace(/\D/g, "").replace(/^7/, "")); });
+    nm.addEventListener("input", function () { find(nm.value); });
+    box.onclick = function (e) {
+      var b = e.target.closest("button"); if (!b) return;
+      ph.value = fmtPhone(b.getAttribute("data-ph")); nm.value = b.getAttribute("data-nm"); box.hidden = true;
+      onPick({ id: +b.getAttribute("data-id"), name: b.getAttribute("data-nm"), rank: +b.getAttribute("data-rk") });
+    };
+    m.addEventListener("click", function (e) { if (!e.target.closest(".who")) box.hidden = true; });
+  }
+  function personAddModal() {
+    modal("<h2>Новый участник</h2><form id=\"paf\" class=\"stack\">" + whoFields() +
+      '<p class="hint">Обычно участники появляются сами — когда записываются по ссылке или их отмечают на мероприятии. Здесь можно добавить человека вручную, например чтобы выдать сертификат.</p>' +
+      '<div class="actions"><button type="button" class="btn ghost" data-close>Отмена</button><button class="btn">Добавить</button></div></form>',
+      function (m, close) {
+        wireWho(m, function () {});
+        m.querySelector("#paf").onsubmit = function (e) {
+          e.preventDefault();
+          api("person_add", { phone: v("w_phone"), name: v("w_name") }).then(function (r) {
+            close(); toast(r.existed ? "Такой участник уже есть — открываем" : "Участник добавлен"); location.hash = "#/person/" + r.person.id;
+          }).catch(fail);
+        };
+      });
+  }
+  function rankOpts(rank, ready, suggest) {
+    var C = window.NespatCert, R = S.dict.ranks;
+    return [1, 2, 3, 4, 5, 6, 7].map(function (i) {
+      var have = i <= rank;
+      return '<label class="opt' + (have ? " cur" : "") + '"><input type="radio" name="rk" value="' + i + '"' + (i === suggest ? " checked" : "") + ">" +
+        "<span><b>" + ["I", "II", "III", "IV", "V", "VI", "VII"][i - 1] + " · " + esc(R[i].name) + (have ? " — уже есть" : i === ready ? " — набрал посещения" : "") + "</b><small>" +
+        esc((C && C.rankById(i) ? C.rankById(i).reason : "")) + "</small></span></label>";
+    }).join("");
+  }
+  // выдача — всегда из карточки участника: там видно посещения и путь званий
   function certModal(p) {
-    var C = window.NespatCert, R = S.dict.ranks, suggest = p.ready || Math.min(7, (+p.rank || 0) + 1);
+    var C = window.NespatCert, suggest = p.ready || Math.min(7, (+p.rank || 0) + 1);
     modal("<h2>Сертификат · " + esc(p.name) + "</h2><form id=\"cf\" class=\"stack\">" +
-      '<fieldset class="opts" data-tour="c-rank"><legend>Звание</legend>' + [1, 2, 3, 4, 5, 6, 7].map(function (i) {
-        var have = i <= +p.rank;
-        return '<label class="opt' + (have ? " cur" : "") + '"><input type="radio" name="rk" value="' + i + '"' + (i === suggest ? " checked" : "") + ">" +
-          "<span><b>" + ["I", "II", "III", "IV", "V", "VI", "VII"][i - 1] + " · " + esc(R[i].name) + (have ? " — уже есть" : i === p.ready ? " — набрал посещения" : "") + "</b><small>" +
-          esc((C && C.rankById(i) ? C.rankById(i).reason : "")) + "</small></span></label>";
-      }).join("") + "</fieldset>" +
+      '<fieldset class="opts" data-tour="c-rank"><legend>Звание</legend><div class="stack" style="gap:6px">' + rankOpts(+p.rank, p.ready, suggest) + "</div></fieldset>" +
       '<div class="grid2"><label class="f">Дата вручения<input type="date" id="c_date" value="' + todayIso() + '"></label>' +
       '<label class="f">Комментарий<input type="text" id="c_note" maxlength="120" placeholder="Необязательно"></label></div>' +
       '<p class="hint">Сертификат с защитой от подделки — та же система, что на сайте. Ссылку можно отправить участнику в Telegram, бланк — распечатать на А4.</p>' +
@@ -632,6 +689,21 @@
         };
       }, true);
   }
+  // «Выдать сертификат» в реестре: выбрать или добавить участника → его карточка с открытым окном выдачи
+  function certWhoModal() {
+    modal("<h2>Кому выдаём сертификат?</h2><form id=\"cwf\" class=\"stack\">" + whoFields("c-who") +
+      '<p class="hint">Начните вводить телефон или имя и выберите человека из подсказки. Если его ещё нет в базе — заполните оба поля, он добавится. Откроется карточка участника с окном выдачи.</p>' +
+      '<div class="actions"><button type="button" class="btn ghost" data-close>Отмена</button><button class="btn">Дальше</button></div></form>',
+      function (m, close) {
+        var picked = null;
+        wireWho(m, function (who) { picked = who; });
+        m.querySelector("#cwf").onsubmit = function (e) {
+          e.preventDefault();
+          (picked ? Promise.resolve(picked) : api("person_add", { phone: v("w_phone"), name: v("w_name") }).then(function (r) { return r.person; }))
+            .then(function (person) { close(); S.openCert = person.id; location.hash = "#/person/" + person.id; }).catch(fail);
+        };
+      });
+  }
   function certDone(p, rk, number, url) {
     var text = "Твой сертификат клуба «НЕ СПАТЬ МОСКВА»: звание «" + rankName(rk) + "». Поздравляем!";
     modal("<h2>Сертификат выдан</h2><p style=\"margin:0\"><b>" + esc(p.name) + "</b> · " + esc(rankName(rk)) + '</p><p class="hint">Номер ' + esc(number) + "</p>" +
@@ -639,6 +711,48 @@
       '<div class="actions"><a class="btn ghost" target="_blank" rel="noopener" href="' + esc(url) + '">Открыть бланк</a>' +
       '<a class="btn" target="_blank" rel="noopener" href="' + esc(tgShare(url, text)) + '">Отправить в Telegram</a></div>',
       function (m) { m.querySelector("#cc").onclick = function () { copy(url); }; });
+  }
+
+  // ---------- реестр сертификатов ----------
+  var CQ = "";
+  function viewCerts() {
+    shell("certs", '<div class="empty">Загружаю…</div>');
+    loadCerts(true);
+  }
+  function loadCerts(full) {
+    api("certs", null, "&q=" + encodeURIComponent(CQ)).then(function (d) {
+      var rows = d.certs.length ? '<div class="plist">' + d.certs.map(function (c) {
+        return '<div class="pr crow"><span class="ava" style="background:var(--accent-soft);color:#ff8a80;font-family:var(--fd)">' + ["I", "II", "III", "IV", "V", "VI", "VII"][c.rank - 1] + "</span>" +
+          '<div><a class="nm" href="#/person/' + c.person_id + '" style="text-decoration:none">' + esc(c.name) + '</a><div class="sub"><span class="chip rank">' + esc(rankName(+c.rank)) + "</span><span>" + esc(c.number) + "</span><span>" + esc(dateShort(c.date)) + "</span>" +
+          (c.user_name ? "<span>выдал(а) " + esc(c.user_name) + "</span>" : "") + "</div></div>" +
+          '<button type="button" class="dots" data-id="' + c.id + '" aria-label="Действия">⋯</button></div>';
+      }).join("") + "</div>" : '<div class="card empty"><b>' + (CQ ? "Ничего не нашли" : "Сертификатов пока нет") + "</b>" +
+        (CQ ? "" : "Нажмите «Выдать сертификат» и выберите участника — откроется его карточка с окном выдачи. Выданные сертификаты собираются здесь.") + "</div>";
+      if (!full && document.getElementById("clist")) { document.getElementById("clist").innerHTML = rows; bindCerts(d.certs); return; }
+      shell("certs",
+        '<div class="head"><h1>Сертификаты</h1><button type="button" class="btn" id="cNew" data-tour="cert-new">Выдать сертификат</button></div>' +
+        '<input type="search" class="search" id="cq" placeholder="Имя, телефон или номер сертификата" value="' + esc(CQ) + '">' +
+        '<div id="clist">' + rows + "</div>" +
+        '<p class="hint" style="margin-top:10px">Сертификат выдаётся из карточки участника — там видно, сколько у него посещений и до какого звания он дорос. «Выдать сертификат» сам откроет нужную карточку.</p>');
+      document.getElementById("cNew").onclick = certWhoModal;
+      var q = document.getElementById("cq"), t = null;
+      q.oninput = function () { clearTimeout(t); t = setTimeout(function () { CQ = q.value.trim(); loadCerts(false); }, 250); };
+      bindCerts(d.certs);
+    }).catch(fail);
+  }
+  function bindCerts(list) {
+    var box = document.getElementById("clist"); if (!box) return;
+    box.onclick = function (e) {
+      var b = e.target.closest(".dots"); if (!b) return;
+      var c = list.filter(function (x) { return +x.id === +b.getAttribute("data-id"); })[0];
+      var text = "Твой сертификат клуба «НЕ СПАТЬ МОСКВА»: звание «" + rankName(+c.rank) + "». Поздравляем!";
+      openMenu(b, [
+        { label: "Открыть бланк", href: c.url },
+        { label: "Скопировать ссылку", fn: function () { copy(c.url); } },
+        { label: "Отправить в Telegram", href: tgShare(c.url, text) },
+        { label: "Карточка участника", href: "#/person/" + c.person_id },
+      ]);
+    };
   }
 
   // ---------- сводка ----------
@@ -798,7 +912,9 @@
       { sel: "new-event", go: "#/", icon: "plus", title: "Новое мероприятие", text: "Кнопка создания. Вид, дата, время, место и число мест — и через минуту у вас готовая ссылка для Telegram-канала." },
       { sel: "ev-list", go: "#/", icon: "cal", title: "Карточки мероприятий", text: "На каждой — дата, время, место, статус записи и сколько человек уже записалось. Нажмите на карточку, чтобы открыть список и отмечать пришедших." },
       { sel: "nav-people", go: "#/people", icon: "people", title: "Участники", text: "Каждый человек — по номеру телефона. В его карточке все мероприятия, посещения, звание и выданные сертификаты." },
-      { sel: "ready", go: "#/people", icon: "medal", title: "Готовы к званию", text: "Штаб сам считает посещения и подсказывает, кто набрал 10, 30 или 100 тренировок. Сертификат выдаётся из карточки участника." },
+      { sel: "ready", go: "#/people", icon: "medal", title: "Готовы к званию", text: "Штаб сам считает посещения и подсказывает, кто набрал 10, 30 или 100 тренировок." },
+      { sel: "plist", go: "#/people", need: "certs", icon: "medal", title: "Сертификат — из карточки", text: "Откройте участника и нажмите «Выдать сертификат»: в карточке видно его посещения и путь званий, штаб сам отметит следующее звание. Ссылку на сертификат — сразу в Telegram." },
+      { sel: "nav-certs", go: "#/certs", need: "certs", icon: "medal", title: "Сертификаты", text: "Реестр всех выданных сертификатов: кому, какое звание, номер, кто выдал. Кнопка «Выдать сертификат» откроет карточку нужного участника." },
       { sel: "nav-stats", go: "#/stats", need: "stats", icon: "stats", title: "Сводка", text: "Явка, активные участники, звания, самые активные — за 30 дней, год или всё время." },
       { sel: "nav-team", go: "#/team", need: "team", icon: "team", title: "Команда", text: "Здесь добавляют Сержантов и Командиров. У каждого свой PIN, при первом входе его попросят сменить." },
       { sel: "help", icon: "help", title: "Помощь всегда рядом", text: "Кнопка «?» открывает центр помощи: короткие пошаговые подсказки по любой задаче — создать мероприятие, отметить пришедших, выдать сертификат." },
@@ -822,14 +938,15 @@
       { sel: "add", icon: "plus", title: "Пришёл без записи", text: "Введите телефон — если человек уже есть в базе, штаб подскажет его. Кнопка «Пришёл» сразу добавит и отметит, «Записать» — только запишет." },
       { sel: "ev-stats", icon: "medal", title: "Из отметок — звания", text: "Каждая отметка — посещение в карточке участника. Набрал 10, 30 или 100 — штаб подскажет выдать новое звание." },
     ] },
-    cert: { icon: "medal", title: "Как выдать сертификат", sub: "Звание и ссылка для участника", need: "certs", needs: "person", steps: [
-      { sel: "path", icon: "medal", title: "Путь бойца", text: "Красным подсвечены полученные звания, зелёной рамкой — то, до которого человек уже дорос по посещениям." },
-      { sel: "cert", icon: "medal", title: "Кнопка выдачи", text: "Сертификат выдаётся отсюда. Откроем окно — ничего не выдастся, пока вы сами не нажмёте «Выдать»." },
-      { sel: "c-rank", open: "cert", icon: "flag", title: "Выберите звание", text: "Штаб заранее отметит подходящее. Можно выбрать любое: Защитника, Наставника и Легенду дают по решению команды." },
-      { icon: "check", title: "Отправьте ссылку", text: "После «Выдать» появится ссылка на именной сертификат с защитой от подделки — отправьте её в Telegram. Бланк можно распечатать на А4." },
+    cert: { icon: "medal", title: "Как выдать сертификат", sub: "Из карточки участника", need: "certs", needs: "person", steps: [
+      { sel: "path", icon: "medal", title: "Путь бойца", text: "Сертификат выдаётся в карточке участника. Красным подсвечены полученные звания, зелёной рамкой — то, до которого человек дорос по посещениям." },
+      { sel: "cert", icon: "medal", title: "Кнопка выдачи", text: "Откроем окно — ничего не выдастся, пока вы сами не нажмёте «Выдать»." },
+      { sel: "c-rank", open: "cert", icon: "flag", title: "Звание", text: "Штаб заранее отметит следующее звание. Защитника, Наставника и Легенду дают по решению команды." },
+      { icon: "check", title: "Отправьте ссылку", text: "После «Выдать» появится ссылка на именной сертификат с защитой от подделки — отправьте её в Telegram. Все выданные сертификаты — в разделе «Сертификаты»." },
     ] },
     people: { icon: "people", title: "Как найти участника", sub: "Поиск и фильтры", steps: [
       { sel: "search", go: "#/people", icon: "search", title: "Поиск", text: "Ищите по имени или по любой части телефона — список обновляется на ходу." },
+      { sel: "person-new", go: "#/people", icon: "plus", title: "Добавить вручную", text: "Обычно участники появляются сами — из записи по ссылке и отметок на мероприятиях. «+ Участник» — если нужно завести человека сразу, например чтобы выдать ему сертификат." },
       { sel: "ready", go: "#/people", icon: "medal", title: "Фильтры", text: "«Готовы к званию» — кому пора выдать сертификат. «Давно не были» — кого стоит позвать снова: последнее посещение больше трёх недель назад." },
       { sel: "plist", go: "#/people", icon: "people", title: "Карточка участника", text: "Нажмите на человека — откроются его мероприятия, посещения, звание и сертификаты. Там же можно поправить имя, телефон и добавить заметку." },
     ] },
@@ -844,7 +961,11 @@
       { sel: "stats-tiles", go: "#/stats", icon: "stats", title: "Главные цифры", text: "Явка — сколько пришло из записавшихся на прошедшие мероприятия. Активные — кто был хотя бы раз за период. Ниже — по видам, званиям и самые активные." },
     ] },
   };
-  var SCREEN = { event: ["share", "attend"], person: ["cert"], people: ["people"], team: ["team"], stats: ["stats"] };
+  var PERSON_TIPS = [
+    { sel: "path", icon: "medal", title: "Путь бойца", text: "Красным подсвечены полученные звания, зелёной рамкой — то, до которого человек уже дорос по посещениям." },
+    { sel: "cert", need: "certs", icon: "medal", title: "Выдать сертификат", text: "Звание и именной сертификат — отсюда. Все выданные сертификаты собраны в разделе «Сертификаты»." },
+  ];
+  var SCREEN = { event: ["share", "attend"], person: ["cert"], people: ["people"], team: ["team"], stats: ["stats"], certs: ["cert"] };
 
   function svgI(name) { return '<svg viewBox="0 0 24 24" aria-hidden="true">' + (TI[name] || TI.hi) + "</svg>"; }
   function allowed(t) { return !t.need || S.can[t.need]; }
@@ -883,7 +1004,7 @@
       if (!pick) {
         return startTour([isEv
           ? { sel: "new-event", go: "#/", icon: "plus", title: "Сначала нужно мероприятие", text: "Эта подсказка показывается на карточке мероприятия. Создайте первое мероприятие кнопкой «+ Мероприятие» — и запустите её снова." }
-          : { sel: "nav-people", go: "#/people", icon: "people", title: "Пока нет участников", text: "Участники появятся, когда начнут записываться по ссылке или когда вы отметите их на мероприятии. Тогда эта подсказка покажет выдачу сертификата." }], true);
+          : { sel: "person-new", go: "#/people", icon: "people", title: "Сначала нужен участник", text: "Сертификат выдаётся из карточки участника. Участники появляются сами из записей и отметок — или добавьте человека кнопкой «+ Участник», откройте его карточку и нажмите «Выдать сертификат»." }], true);
       }
       S.topicRun = true;
       location.hash = (isEv ? "#/event/" : "#/person/") + pick.id;
@@ -900,9 +1021,14 @@
   function maybeTour(kind) {
     var key = "nsm_tour_" + kind + "_" + S.me.id;
     try { if (localStorage.getItem(key)) return; localStorage.setItem(key, "1"); } catch (e) { return; }
-    if (!S.me.tour_done || tourEl || S.topicRun) return; // сначала — общий обзор; идущую тему не перебиваем
-    var steps = kind === "event" ? TOPICS.share.steps.slice(0, 1).concat(TOPICS.attend.steps.slice(0, 2)) : TOPICS.cert.steps.slice(0, allowed(TOPICS.cert) ? 2 : 1);
-    setTimeout(function () { if (!tourEl && !S.topicRun) startTour(steps, true, "Подсказка для нового экрана"); }, 400);
+    if (!S.me.tour_done || tourEl || S.topicRun || document.querySelector(".modal")) { try { localStorage.removeItem(key); } catch (e) {} return; } // сначала — общий обзор; идущую тему и открытое окно не перебиваем
+    var steps = kind === "event" ? TOPICS.share.steps.slice(0, 1).concat(TOPICS.attend.steps.slice(0, 2)) : PERSON_TIPS.filter(function (x) { return !x.need || S.can[x.need]; });
+    setTimeout(function () {
+      // поверх открытого окна подсказку не показываем — покажем при следующем визите
+      if (tourEl || S.topicRun) return;
+      if (document.querySelector(".modal")) { try { localStorage.removeItem(key); } catch (e) {} return; }
+      startTour(steps, true, "Подсказка для нового экрана");
+    }, 400);
   }
 
   var tourEl = null;

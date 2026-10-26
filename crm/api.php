@@ -276,6 +276,37 @@ try {
             $st->execute(['%' . $q . '%', $digits, '%' . $digits . '%']);
             out(['ok' => true, 'people' => $st->fetchAll()]);
 
+        case 'person_add':
+            // участник без мероприятия: например, чтобы сразу выдать сертификат
+            $need('people');
+            $phone = crm_phone($str('phone', 40));
+            $name = $str('name', 80);
+            if (!$phone) {
+                fail('Телефон не похож на российский номер');
+            }
+            $st = $db->prepare('SELECT id FROM people WHERE phone = ?');
+            $st->execute([$phone]);
+            $existed = (bool)$st->fetchColumn();
+            if (!$existed && $name === '') {
+                fail('Укажите имя нового участника');
+            }
+            $pid = crm_person($phone, $name, 'crm');
+            if (!$existed) {
+                crm_log($meId, 'person_add', null, $pid, $name);
+            }
+            out(['ok' => true, 'existed' => $existed, 'person' => person_full($db, $pid)['person']]);
+
+        case 'certs':
+            $need('certs');
+            $q = trim((string)($_GET['q'] ?? ''));
+            $digits = preg_replace('/\D+/', '', $q);
+            $st = $db->prepare("SELECT c.id, c.rank, c.date, c.number, c.url, c.note, c.created_at, p.id AS person_id, p.name, p.phone, u.name AS user_name
+                FROM certs c JOIN people p ON p.id = c.person_id LEFT JOIN users u ON u.id = c.issued_by
+                WHERE ? = '' OR p.name LIKE ? OR c.number LIKE ? OR (? <> '' AND p.phone LIKE ?)
+                ORDER BY c.id DESC LIMIT 1000");
+            $st->execute([$q, '%' . $q . '%', '%' . $q . '%', $digits, '%' . $digits . '%']);
+            out(['ok' => true, 'certs' => $st->fetchAll()]);
+
         case 'person_save':
             $need('people');
             $p = person_row($db, $int('id'));
