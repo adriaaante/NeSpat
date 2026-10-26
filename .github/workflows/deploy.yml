@@ -37,7 +37,9 @@ jobs:
         run: |
           for f in index.html 404.html .htaccess robots.txt sitemap.xml \
                    assets/css/style.css assets/js/main.js assets/js/config.js \
-                   assets/img/team-main.jpg assets/img/monogram.png; do
+                   assets/img/team-main.jpg assets/img/monogram.png \
+                   zapis.html crm/index.html crm/app.js crm/app.css crm/api.php crm/pub.php \
+                   crm/lib/db.php crm/lib/auth.php crm/lib/.htaccess; do
             [ -f "$f" ] || { echo "::error::нет файла $f — выкладка остановлена"; exit 1; }
           done
           echo "все ключевые файлы на месте"
@@ -59,3 +61,15 @@ jobs:
             **/.claude/**
             CLAUDE.md
             **/.DS_Store
+
+      # Штаб (CRM) живой: PHP отвечает, база лежит над public_html, а не в папке сайта
+      - name: Проверить штаб на живом сайте
+        if: steps.gate.outputs.ready == 'true'
+        run: |
+          sleep 10
+          r=$(curl -s --max-time 20 https://nespatmoskva.ru/crm/api.php?a=ping || true)
+          echo "ping: $r"
+          echo "$r" | grep -q '"ok":true' || { echo "::error::CRM не отвечает — проверь версию PHP сайта в панели Beget (нужна 8.x)"; exit 1; }
+          echo "$r" | grep -q '"store":"outside"' || echo "::warning::база CRM лежит в запасной папке crm/data/"
+          code=$(curl -s -o /dev/null -w '%{http_code}' https://nespatmoskva.ru/crm/lib/db.php)
+          [ "$code" = "403" ] || { echo "::error::crm/lib/ открыт снаружи (код $code)"; exit 1; }
