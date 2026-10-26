@@ -16,7 +16,7 @@ const { chromium } = require('playwright');
   await p.emulateMedia({ media: 'print' });
   await p.waitForTimeout(400);
   await p.pdf({
-    path: '/home/user/NeSpat/assets/doc/nespat-certificates-guide.pdf',
+    path: require('path').join(__dirname, '..', 'assets/doc/nespat-certificates-guide.pdf'),
     format: 'A4', printBackground: true, preferCSSPageSize: true,
   });
   console.log('битые запросы:', bad.length ? bad.join(', ') : 'нет');

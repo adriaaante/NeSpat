@@ -19,6 +19,9 @@ RewriteRule ^ https://nespatmoskva.ru%{REQUEST_URI} [L,R=301]
 
 ErrorDocument 404 /404.html
 
+# Студия выдачи сертификатов закрыта 26.10.2026 — выдача теперь в штабе клуба
+RewriteRule ^certificate-studio\.html$ https://nespatmoskva.ru/crm/ [L,R=301]
+
 # Кэширование статики (видео и фото тяжёлые — держим в кэше браузера)
 <IfModule mod_expires.c>
   ExpiresActive On
