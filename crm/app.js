@@ -183,13 +183,13 @@
         return '<a href="' + it[1] + '" data-tour="nav-' + it[0] + '" class="' + (active === it[0] ? "on" : "") + '">' + it[2] + "</a>";
       }).join("") + "</nav>" +
       '<div class="tools"><button type="button" class="help" id="help" data-tour="help" title="Обучение" aria-label="Обучение">?</button>' +
-      '<a href="#/me" class="me' + (active === "me" ? " on" : "") + '" aria-label="Профиль"><span class="ini">' + esc(initials(S.me.name)) + "</span></a></div>" +
+      '<a href="#/me" data-tour="me" class="me' + (active === "me" ? " on" : "") + '" aria-label="Профиль"><span class="ini">' + esc(initials(S.me.name)) + "</span></a></div>" +
       '</div></header><main class="wrap">' + html + "</main>" +
       // на телефоне разделы — внизу, как в приложении
       '<nav class="tabbar">' + items.map(function (it) {
         return '<a href="' + it[1] + '" data-tour="nav-' + it[0] + '" class="' + (active === it[0] ? "on" : "") + '"><svg viewBox="0 0 24 24" aria-hidden="true">' + ICON[it[0]] + "</svg><span>" + it[3] + "</span></a>";
       }).join("") + "</nav>";
-    document.getElementById("help").onclick = function () { startTour(screenTour(), true); };
+    document.getElementById("help").onclick = helpCenter;
   }
   function boot() {
     api("me").then(function (d) {
@@ -197,7 +197,7 @@
       if (S.me.must_change) return showChangePin(true);
       route();
       // первый вход — сразу обучение
-      if (!S.me.tour_done) setTimeout(function () { startTour(TOURS.main, false); }, 500);
+      if (!S.me.tour_done) setTimeout(function () { startTour(TOPICS.main.steps, false); }, 500);
     }).catch(fail);
   }
   var current = "";
@@ -294,18 +294,18 @@
     var k = S.dict.kinds, ed = e || { kind: "training", date: todayIso(), time_start: "19:00", time_end: "", capacity: 0 };
     modal("<h2>" + (e ? "Изменить мероприятие" : "Новое мероприятие") + "</h2>" +
       '<form id="ef" class="stack">' +
-      '<fieldset class="opts"><legend>Что за мероприятие</legend><div class="kinds">' +
+      '<fieldset class="opts" data-tour="f-kind"><legend>Что за мероприятие</legend><div class="kinds">' +
       Object.keys(k).map(function (key) {
         return '<label><input type="radio" name="kind" value="' + key + '"' + (ed.kind === key ? " checked" : "") + "><span>" + esc(k[key]) + "</span></label>";
       }).join("") + "</div></fieldset>" +
       '<label class="f">Название<input type="text" id="e_title" maxlength="120" required value="' + esc(ed.title || "") + '" placeholder="Например: Бокс в Парке Горького"></label>' +
-      '<div class="grid3"><label class="f">Дата<input type="date" id="e_date" required value="' + esc(ed.date) + '"></label>' +
+      '<div class="grid3" data-tour="f-when"><label class="f">Дата<input type="date" id="e_date" required value="' + esc(ed.date) + '"></label>' +
       '<label class="f">Начало<input type="time" id="e_ts" required value="' + esc(ed.time_start) + '"></label>' +
       '<label class="f">Конец<input type="time" id="e_te" value="' + esc(ed.time_end || "") + '"></label></div>' +
-      '<label class="f">Место<input type="text" id="e_place" maxlength="120" required value="' + esc(ed.place || "") + '" placeholder="Парк Горького, площадка у Пионерского пруда"></label>' +
+      '<label class="f" data-tour="f-place">Место<input type="text" id="e_place" maxlength="120" required value="' + esc(ed.place || "") + '" placeholder="Парк Горького, площадка у Пионерского пруда"></label>' +
       '<div class="grid2"><label class="f">Адрес<input type="text" id="e_addr" maxlength="200" value="' + esc(ed.address || "") + '" placeholder="Улица, дом, ориентир"></label>' +
       '<label class="f">Ссылка на карту<input type="url" id="e_map" maxlength="500" value="' + esc(ed.map_url || "") + '" placeholder="https://yandex.ru/maps/…"></label></div>' +
-      '<label class="f">Мест<input type="number" id="e_cap" min="0" max="10000" inputmode="numeric" value="' + (+ed.capacity || "") + '" placeholder="Пусто — без ограничений"></label>' +
+      '<label class="f" data-tour="f-cap">Мест<input type="number" id="e_cap" min="0" max="10000" inputmode="numeric" value="' + (+ed.capacity || "") + '" placeholder="Пусто — без ограничений"></label>' +
       '<label class="f">Что взять, что будет<textarea id="e_desc" maxlength="2000" placeholder="Форма по погоде, вода. Работа в парах, лапы.">' + esc(ed.description || "") + "</textarea></label>" +
       '<p class="hint">Всё, кроме ссылки на карту и описания, увидят участники на странице записи.</p>' +
       '<div class="actions"><button type="button" class="btn ghost" data-close>Отмена</button><button class="btn">' + (e ? "Сохранить" : "Создать") + "</button></div></form>",
@@ -344,13 +344,13 @@
     var html = '<a href="#/" class="small muted" style="text-decoration:none">← Все мероприятия</a>' +
       '<div class="hero" style="margin-top:10px"><div class="row" style="justify-content:space-between;align-items:flex-start">' +
       '<div><div class="row">' + chip(st) + '<span class="chip">' + esc(S.dict.kinds[e.kind] || "") + "</span></div><h1>" + esc(e.title) + "</h1></div>" +
-      '<div class="row">' + acts.join("") + "</div></div>" +
+      '<div class="row" data-tour="ev-actions">' + acts.join("") + "</div></div>" +
       '<div class="facts"><span><b>' + esc(dateLong(e.date)) + "</b></span><span><b>" + esc(times(e)) + "</b></span>" +
       "<span>" + esc(e.place) + (e.address ? ", " + esc(e.address) : "") + "</span>" +
       (e.map_url ? '<a href="' + esc(e.map_url) + '" target="_blank" rel="noopener">На карте ↗</a>' : "") + "</div>" +
       (e.description ? '<p class="desc">' + esc(e.description) + "</p>" : "") + "</div>" +
 
-      '<div class="stats3" style="margin-top:10px">' +
+      '<div class="stats3" style="margin-top:10px" data-tour="ev-stats">' +
       '<div class="st"><b>' + act.length + '</b><span>Записались</span></div>' +
       '<div class="st ok"><b>' + came + '</b><span>Пришли</span></div>' +
       '<div class="st"><b>' + (cap ? Math.max(0, cap - act.length) : "∞") + "</b><span>" + (cap ? "Свободно из " + cap : "Мест без ограничений") + "</span></div></div>" +
@@ -540,7 +540,7 @@
       if (!full && document.getElementById("plist")) { document.getElementById("plist").innerHTML = listHtml; return; }
       shell("people",
         '<div class="head"><h1>Участники</h1>' + (S.can.export ? '<a class="btn ghost small" href="api.php?a=csv&what=people">Выгрузить (Excel)</a>' : "") + "</div>" +
-        '<input type="search" class="search" id="pq" placeholder="Имя или телефон" value="' + esc(S.pq) + '">' +
+        '<input type="search" class="search" id="pq" data-tour="search" placeholder="Имя или телефон" value="' + esc(S.pq) + '">' +
         '<div class="tabs" id="pf" data-tour="ready">' + PF.map(function (f) { return '<button type="button" data-f="' + f[0] + '" class="' + (S.pf === f[0] ? "on" : "") + '">' + f[1] + "</button>"; }).join("") + "</div>" +
         '<div class="plist" id="plist" data-tour="plist">' + listHtml + "</div>" +
         '<p class="hint" style="margin-top:10px">«Готовы к званию» — набрали посещений на следующее звание: 10 для «Бойца», 30 для «Железного», 100 для «Стража». «Давно не были» — последнее посещение больше трёх недель назад.</p>');
@@ -610,7 +610,7 @@
   function certModal(p) {
     var C = window.NespatCert, R = S.dict.ranks, suggest = p.ready || Math.min(7, (+p.rank || 0) + 1);
     modal("<h2>Сертификат · " + esc(p.name) + "</h2><form id=\"cf\" class=\"stack\">" +
-      '<fieldset class="opts"><legend>Звание</legend>' + [1, 2, 3, 4, 5, 6, 7].map(function (i) {
+      '<fieldset class="opts" data-tour="c-rank"><legend>Звание</legend>' + [1, 2, 3, 4, 5, 6, 7].map(function (i) {
         var have = i <= +p.rank;
         return '<label class="opt' + (have ? " cur" : "") + '"><input type="radio" name="rk" value="' + i + '"' + (i === suggest ? " checked" : "") + ">" +
           "<span><b>" + ["I", "II", "III", "IV", "V", "VI", "VII"][i - 1] + " · " + esc(R[i].name) + (have ? " — уже есть" : i === p.ready ? " — набрал посещения" : "") + "</b><small>" +
@@ -661,9 +661,9 @@
       var rl = { 0: "Без звания" }; Object.keys(S.dict.ranks).forEach(function (k) { rl[k] = S.dict.ranks[k].name; });
       var maxE = Math.max.apply(null, [1].concat(d.last.map(function (e) { return +e.taken; })));
       shell("stats",
-        '<div class="head"><h1>Сводка</h1><div class="tabs" id="per" style="margin:0">' +
+        '<div class="head"><h1>Сводка</h1><div class="tabs" id="per" data-tour="period" style="margin:0">' +
         [[30, "30 дней"], [90, "90 дней"], [365, "Год"], [0, "Всё время"]].map(function (t) { return '<button type="button" data-d="' + t[0] + '" class="' + (t[0] === days ? "on" : "") + '">' + t[1] + "</button>"; }).join("") + "</div></div>" +
-        '<div class="tiles">' +
+        '<div class="tiles" data-tour="stats-tiles">' +
         tile("Мероприятий", d.events, "прошло за период") +
         tile("Пришли", d.came, "отметок посещения", "acc") +
         tile("Явка", att, "пришли из записавшихся", "ok") +
@@ -701,7 +701,7 @@
       var roles = S.dict.roles;
       shell("team",
         '<div class="head"><h1>Команда</h1><button type="button" class="btn" id="addUser" data-tour="add-user">+ Добавить</button></div>' +
-        '<div class="people" id="people">' + d.users.map(function (u) {
+        '<div class="people" id="people" data-tour="team-list">' + d.users.map(function (u) {
           return '<div class="person"><span class="ava ava-' + u.role + '">' + esc(initials(u.name)) + '</span><div class="pinfo"><div class="nm">' + esc(u.name) +
             (+u.id === +S.me.id ? ' <span class="muted small">· вы</span>' : "") + '</div><div class="meta"><b style="color:var(--ink);font-weight:500">' + esc(roles[u.role]) + "</b> · " +
             (u.last_login ? "входил " + ago(u.last_login) : "ещё не входил") + "</div></div>" +
@@ -722,10 +722,10 @@
     var allowed = ["manager", "head", "dev"].filter(function (r) { return S.me.role === "dev" || r !== "dev"; });
     modal("<h2>Новый человек в команде</h2><form id=\"uf\" class=\"stack\">" +
       '<label class="f">Имя<input type="text" id="u_name" autocomplete="off" required placeholder="Например: Артём"></label>' +
-      '<fieldset class="opts"><legend>Роль</legend>' + allowed.map(function (r) {
+      '<fieldset class="opts" data-tour="u-role"><legend>Роль</legend>' + allowed.map(function (r) {
         return '<label class="opt"><input type="radio" name="u_role" value="' + r + '"' + (r === "manager" ? " checked" : "") + "><span><b>" + esc(roles[r]) + "</b><small>" + esc(ROLE_HINT[r]) + "</small></span></label>";
       }).join("") + "</fieldset>" +
-      '<label class="f">Начальный PIN<input type="text" id="u_pin" inputmode="numeric" maxlength="6" autocomplete="off" placeholder="6 цифр или оставьте пустым"></label>' +
+      '<label class="f" data-tour="u-pin">Начальный PIN<input type="text" id="u_pin" inputmode="numeric" maxlength="6" autocomplete="off" placeholder="6 цифр или оставьте пустым"></label>' +
       '<p class="hint">Пустое поле — PIN придумаем сами. При первом входе человек заменит его на свой.</p>' +
       '<div class="actions"><button type="button" class="btn ghost" data-close>Отмена</button><button class="btn">Добавить</button></div></form>',
       function (m, close) {
@@ -768,94 +768,212 @@
     shell("me",
       '<div class="card prof"><span class="big">' + esc(initials(S.me.name)) + "</span><div><h1>" + esc(S.me.name) + '</h1><span class="muted">' + esc(S.dict.roles[S.me.role]) + "</span></div></div>" +
       '<div class="row" style="margin-top:14px"><button type="button" class="btn ghost" id="chpin">Сменить PIN</button>' +
-      '<button type="button" class="btn ghost" id="tourAgain">Пройти обучение</button><button type="button" class="btn danger" id="out">Выйти</button></div>');
+      '<button type="button" class="btn ghost" id="tourAgain">Обучение и подсказки</button><button type="button" class="btn danger" id="out">Выйти</button></div>');
     document.getElementById("chpin").onclick = function () { showChangePin(false); };
-    document.getElementById("tourAgain").onclick = function () { location.hash = "#/"; setTimeout(function () { startTour(TOURS.main, true); }, 300); };
+    document.getElementById("tourAgain").onclick = helpCenter;
     document.getElementById("out").onclick = function () { api("logout", {}).then(function () { S.me = null; showPin(); }).catch(fail); };
   }
 
-  // ---------- обучение: подсветка блоков с подсказками ----------
-  // Шаг: sel — что подсветить ([data-tour=…]), go — какой экран открыть перед шагом.
-  var TOURS = {
-    main: [
-      { title: "Добро пожаловать в штаб", text: "Здесь клуб ведёт мероприятия, записи и участников: кто записался, кто пришёл, кто дорос до звания. Покажем главное за минуту." },
-      { sel: "nav-events", go: "#/", title: "Мероприятия", text: "Тренировки, забеги, турниры и сборы. На каждой карточке — дата, место и сколько человек записалось." },
-      { sel: "new-event", go: "#/", title: "Создать мероприятие", text: "Вид, дата, время, место и число мест. Сразу после создания появится ссылка на запись для Telegram-канала." },
-      { sel: "ev-list", go: "#/", title: "Список мероприятий", text: "Нажмите на карточку, чтобы открыть список записавшихся и отметить, кто пришёл. Прошедшие — на вкладке «Прошедшие»." },
-      { sel: "nav-people", go: "#/people", title: "Участники", text: "Каждый человек — по номеру телефона: все его записи, посещения, звание и сертификаты в одной карточке." },
-      { sel: "ready", go: "#/people", title: "Готовы к званию", text: "Система сама считает посещения и подсказывает, кто набрал 10, 30 или 100 тренировок. Сертификат выдаётся из карточки участника." },
-      { sel: "nav-stats", go: "#/stats", need: "stats", title: "Сводка", text: "Явка, активные участники, самые активные и кто готов к званию — за 30 дней, год или всё время." },
-      { sel: "nav-team", go: "#/team", need: "team", title: "Команда", text: "Добавляйте сержантов и командиров. У каждого свой PIN: при первом входе его попросят сменить." },
-      { sel: "help", title: "Обучение всегда под рукой", text: "Кнопка «?» покажет подсказки по экрану, на котором вы сейчас: мероприятие, участник или список." },
-    ],
-    event: [
-      { sel: "share", title: "Ссылка на запись", text: "Скопируйте или сразу отправьте в Telegram-канал. Участник вводит имя и телефон — и появляется в списке. QR-код можно распечатать для площадки." },
-      { sel: "add", title: "Добавить вручную", text: "Пришёл человек без записи? Введите телефон — если он уже есть в базе, подскажем. «Пришёл» сразу отметит посещение." },
-      { sel: "regs", title: "Отметка «Пришёл»", text: "На тренировке нажимайте «Отметить» у каждого пришедшего. Из отметок складываются посещения и звания." },
-    ],
-    person: [
-      { sel: "path", title: "Путь бойца", text: "Пройденные звания подсвечены красным. Зелёная рамка — звание, до которого человек уже дорос по посещениям." },
-      { sel: "cert", title: "Выдать сертификат", text: "Выберите звание — система соберёт именной сертификат с защитой от подделки. Ссылку можно отправить в Telegram." },
-    ],
+  // ---------- обучение: центр помощи и подсказки с подсветкой блоков ----------
+  // Шаг: sel — какой блок подсветить ([data-tour=…]), go — какой экран открыть,
+  // open — какое окно открыть на время шага (form/cert/user), need — право роли.
+  var TI = {
+    hi: '<path d="M12 2.5 14.6 8l6 .6-4.5 4 1.3 5.9L12 15.5l-5.4 3 1.3-5.9-4.5-4 6-.6L12 2.5Z"/>',
+    cal: ICON.events, people: ICON.people, stats: ICON.stats, team: ICON.team,
+    plus: '<path d="M12 5v14M5 12h14"/>',
+    link: '<path d="M10 14a4.5 4.5 0 0 0 6.4 0l3-3a4.5 4.5 0 0 0-6.4-6.4l-1 1M14 10a4.5 4.5 0 0 0-6.4 0l-3 3a4.5 4.5 0 0 0 6.4 6.4l1-1"/>',
+    check: '<path d="m5 12.5 4.5 4.5L19 7.5"/>',
+    medal: '<circle cx="12" cy="14" r="6"/><path d="M8.5 3h7l-2 5.5h-3L8.5 3ZM12 11.5v5M9.8 14h4.4"/>',
+    clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+    pin: '<path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/>',
+    search: '<circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/>',
+    lock: '<rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/>',
+    help: '<circle cx="12" cy="12" r="9"/><path d="M9.6 9.3a2.5 2.5 0 1 1 3.6 2.3c-.8.4-1.2 1-1.2 1.9M12 16.8v.2"/>',
+    flag: '<path d="M5 21V4M5 4h11l-2 4 2 4H5"/>',
   };
-  function screenTour() { return current === "event" ? TOURS.event : current === "person" ? TOURS.person : TOURS.main; }
+  var TOPICS = {
+    main: { icon: "hi", title: "Обзор штаба", sub: "Что где находится — за минуту", steps: [
+      { icon: "hi", title: "Добро пожаловать в штаб", text: "Здесь клуб ведёт мероприятия, записи и участников: кто записался, кто пришёл, кто дорос до нового звания. Пройдёмся по главному — это займёт минуту." },
+      { sel: "nav-events", go: "#/", icon: "cal", title: "Мероприятия", text: "Тренировки, забеги, турниры и сборы. С этого экрана начинается работа: создаёте мероприятие и отправляете ссылку на запись." },
+      { sel: "new-event", go: "#/", icon: "plus", title: "Новое мероприятие", text: "Кнопка создания. Вид, дата, время, место и число мест — и через минуту у вас готовая ссылка для Telegram-канала." },
+      { sel: "ev-list", go: "#/", icon: "cal", title: "Карточки мероприятий", text: "На каждой — дата, время, место, статус записи и сколько человек уже записалось. Нажмите на карточку, чтобы открыть список и отмечать пришедших." },
+      { sel: "nav-people", go: "#/people", icon: "people", title: "Участники", text: "Каждый человек — по номеру телефона. В его карточке все мероприятия, посещения, звание и выданные сертификаты." },
+      { sel: "ready", go: "#/people", icon: "medal", title: "Готовы к званию", text: "Штаб сам считает посещения и подсказывает, кто набрал 10, 30 или 100 тренировок. Сертификат выдаётся из карточки участника." },
+      { sel: "nav-stats", go: "#/stats", need: "stats", icon: "stats", title: "Сводка", text: "Явка, активные участники, звания, самые активные — за 30 дней, год или всё время." },
+      { sel: "nav-team", go: "#/team", need: "team", icon: "team", title: "Команда", text: "Здесь добавляют Сержантов и Командиров. У каждого свой PIN, при первом входе его попросят сменить." },
+      { sel: "help", icon: "help", title: "Помощь всегда рядом", text: "Кнопка «?» открывает центр помощи: короткие пошаговые подсказки по любой задаче — создать мероприятие, отметить пришедших, выдать сертификат." },
+    ] },
+    create: { icon: "plus", title: "Как создать мероприятие", sub: "Вид, дата, место и места", need: "events", steps: [
+      { sel: "new-event", go: "#/", icon: "plus", title: "Кнопка создания", text: "Мероприятие создаётся отсюда. Сейчас откроем форму и пройдёмся по полям — ничего не сохранится, пока вы сами не нажмёте «Создать»." },
+      { sel: "f-kind", open: "form", icon: "flag", title: "Вид мероприятия", text: "Выберите один вариант: тренировка, бокс, бег, турнир, сбор… Вид виден участнику и считается в сводке." },
+      { sel: "f-when", open: "form", icon: "clock", title: "Дата и время", text: "Дата и время начала обязательны, время окончания — по желанию. Пока мероприятие не прошло, на него открыта запись." },
+      { sel: "f-place", open: "form", icon: "pin", title: "Место", text: "Напишите так, чтобы новичок нашёл: «Парк Горького, площадка у Пионерского пруда». Ниже можно добавить адрес и ссылку на карту." },
+      { sel: "f-cap", open: "form", icon: "people", title: "Сколько мест", text: "Если мест ограниченно — укажите число: когда места кончатся, запись закроется сама. Пусто — без ограничений." },
+      { icon: "check", title: "Готово", text: "Нажмите «Создать» — откроется карточка мероприятия со ссылкой на запись, кнопкой отправки в Telegram и QR-кодом." },
+    ] },
+    share: { icon: "link", title: "Как пригласить на мероприятие", sub: "Ссылка, Telegram и QR-код", needs: "event", steps: [
+      { sel: "share", icon: "link", title: "Ссылка на запись", text: "Скопируйте ссылку или нажмите «Отправить в Telegram» и выберите канал клуба. Участник откроет страницу, введёт имя и телефон — и сразу окажется в списке." },
+      { sel: "share", icon: "link", title: "QR-код для площадки", text: "Кнопка «QR-код» открывает код крупно — его можно распечатать и повесить на месте тренировки: новички запишутся с телефона за 10 секунд." },
+      { sel: "ev-stats", icon: "people", title: "Сколько записалось", text: "Счётчики обновляются сами: записались, пришли и сколько мест осталось." },
+      { sel: "ev-actions", icon: "lock", title: "Закрыть или изменить", text: "«Закрыть запись» — когда набрали группу. «Изменить» — поменять время или место. В меню «⋯» — выгрузка списка в Excel и отмена мероприятия." },
+    ] },
+    attend: { icon: "check", title: "Как отметить пришедших", sub: "Отметки на тренировке", needs: "event", steps: [
+      { sel: "regs", icon: "check", title: "Список записавшихся", text: "На тренировке нажимайте «Отметить» у каждого пришедшего — кнопка станет зелёной. Ошиблись — нажмите ещё раз, отметка снимется." },
+      { sel: "add", icon: "plus", title: "Пришёл без записи", text: "Введите телефон — если человек уже есть в базе, штаб подскажет его. Кнопка «Пришёл» сразу добавит и отметит, «Записать» — только запишет." },
+      { sel: "ev-stats", icon: "medal", title: "Из отметок — звания", text: "Каждая отметка — посещение в карточке участника. Набрал 10, 30 или 100 — штаб подскажет выдать новое звание." },
+    ] },
+    cert: { icon: "medal", title: "Как выдать сертификат", sub: "Звание и ссылка для участника", need: "certs", needs: "person", steps: [
+      { sel: "path", icon: "medal", title: "Путь бойца", text: "Красным подсвечены полученные звания, зелёной рамкой — то, до которого человек уже дорос по посещениям." },
+      { sel: "cert", icon: "medal", title: "Кнопка выдачи", text: "Сертификат выдаётся отсюда. Откроем окно — ничего не выдастся, пока вы сами не нажмёте «Выдать»." },
+      { sel: "c-rank", open: "cert", icon: "flag", title: "Выберите звание", text: "Штаб заранее отметит подходящее. Можно выбрать любое: Защитника, Наставника и Легенду дают по решению команды." },
+      { icon: "check", title: "Отправьте ссылку", text: "После «Выдать» появится ссылка на именной сертификат с защитой от подделки — отправьте её в Telegram. Бланк можно распечатать на А4." },
+    ] },
+    people: { icon: "people", title: "Как найти участника", sub: "Поиск и фильтры", steps: [
+      { sel: "search", go: "#/people", icon: "search", title: "Поиск", text: "Ищите по имени или по любой части телефона — список обновляется на ходу." },
+      { sel: "ready", go: "#/people", icon: "medal", title: "Фильтры", text: "«Готовы к званию» — кому пора выдать сертификат. «Давно не были» — кого стоит позвать снова: последнее посещение больше трёх недель назад." },
+      { sel: "plist", go: "#/people", icon: "people", title: "Карточка участника", text: "Нажмите на человека — откроются его мероприятия, посещения, звание и сертификаты. Там же можно поправить имя, телефон и добавить заметку." },
+    ] },
+    team: { icon: "team", title: "Как добавить человека в команду", sub: "Роли и PIN", need: "team", steps: [
+      { sel: "add-user", go: "#/team", icon: "plus", title: "Добавить в команду", text: "Сержанты ведут мероприятия и отметки, Командиры — ещё и сертификаты, сводку и команду." },
+      { sel: "u-role", go: "#/team", open: "user", icon: "team", title: "Роль", text: "Выберите роль — под каждой написано, что она может. Права можно поменять, только пересоздав человека, поэтому выбирайте по задачам." },
+      { sel: "u-pin", go: "#/team", open: "user", icon: "lock", title: "Начальный PIN", text: "Оставьте пустым — штаб придумает сам. Передайте PIN лично: при первом входе человек сменит его на свой." },
+      { sel: "team-list", go: "#/team", icon: "team", title: "Команда", text: "Здесь видно, кто когда входил. Забыл PIN — «Сменить PIN» выдаст новый временный; ушёл из клуба — «Удалить», доступ пропадёт сразу." },
+    ] },
+    stats: { icon: "stats", title: "Как читать сводку", sub: "Явка и активность", need: "stats", steps: [
+      { sel: "period", go: "#/stats", icon: "clock", title: "Период", text: "Выберите, за какое время считать: 30 дней, 90 дней, год или всё время." },
+      { sel: "stats-tiles", go: "#/stats", icon: "stats", title: "Главные цифры", text: "Явка — сколько пришло из записавшихся на прошедшие мероприятия. Активные — кто был хотя бы раз за период. Ниже — по видам, званиям и самые активные." },
+    ] },
+  };
+  var SCREEN = { event: ["share", "attend"], person: ["cert"], people: ["people"], team: ["team"], stats: ["stats"] };
+
+  function svgI(name) { return '<svg viewBox="0 0 24 24" aria-hidden="true">' + (TI[name] || TI.hi) + "</svg>"; }
+  function allowed(t) { return !t.need || S.can[t.need]; }
+
+  // Центр помощи: темы по задачам, сверху — подсказки к открытому экрану
+  function helpCenter() {
+    var here = (SCREEN[current] || []).filter(function (k) { return allowed(TOPICS[k]); });
+    var keys = ["main", "create", "share", "attend", "cert", "people", "team", "stats"].filter(function (k) { return allowed(TOPICS[k]); });
+    function card(k, hot) {
+      var t = TOPICS[k];
+      return '<button type="button" class="topic' + (hot ? " hot" : "") + '" data-k="' + k + '"><span class="ti">' + svgI(t.icon) + "</span>" +
+        "<span><b>" + esc(t.title) + "</b><small>" + esc(t.sub) + " · " + plural(t.steps.length, "шаг", "шага", "шагов") + "</small></span><i>›</i></button>";
+    }
+    modal('<div class="hc-head"><span class="ti big">' + svgI("help") + "</span><div><h2>Центр помощи</h2>" +
+      '<p class="hint">Выберите задачу — штаб сам откроет нужный экран и покажет, что нажимать.</p></div></div>' +
+      (here.length ? '<div class="hc-sec">На этом экране</div><div class="topics">' + here.map(function (k) { return card(k, true); }).join("") + "</div>" : "") +
+      '<div class="hc-sec">Все подсказки</div><div class="topics">' + keys.filter(function (k) { return here.indexOf(k) < 0; }).map(function (k) { return card(k); }).join("") + "</div>" +
+      '<div class="actions"><button type="button" class="btn ghost" data-close>Закрыть</button></div>',
+      function (m, close) {
+        m.querySelector(".dialog").onclick = function (e) {
+          var b = e.target.closest(".topic"); if (!b) return;
+          close(); runTopic(b.getAttribute("data-k"));
+        };
+      }, true);
+  }
+
+  // Тема, которой нужен конкретный экран (мероприятие или участник), сама находит пример
+  function runTopic(key) {
+    var t = TOPICS[key];
+    if (!t.needs || current === t.needs) return startTour(t.steps, true);
+    var isEv = t.needs === "event";
+    api(isEv ? "events" : "people", null, isEv ? "&scope=all" : "&f=all").then(function (d) {
+      var list = isEv ? d.events : d.people, pick = null;
+      if (isEv) list.forEach(function (e) { if (!pick && !e.past && e.status !== "cancelled") pick = e; });
+      pick = pick || list[0];
+      if (!pick) {
+        return startTour([isEv
+          ? { sel: "new-event", go: "#/", icon: "plus", title: "Сначала нужно мероприятие", text: "Эта подсказка показывается на карточке мероприятия. Создайте первое мероприятие кнопкой «+ Мероприятие» — и запустите её снова." }
+          : { sel: "nav-people", go: "#/people", icon: "people", title: "Пока нет участников", text: "Участники появятся, когда начнут записываться по ссылке или когда вы отметите их на мероприятии. Тогда эта подсказка покажет выдачу сертификата." }], true);
+      }
+      S.topicRun = true;
+      location.hash = (isEv ? "#/event/" : "#/person/") + pick.id;
+      waitFor(t.steps[0].sel, function () { S.topicRun = false; startTour(t.steps, true); });
+    }).catch(fail);
+  }
+  function waitFor(sel, cb) {
+    var n = 0;
+    (function tick() {
+      if (!sel || document.querySelector('[data-tour="' + sel + '"]') || n++ > 40) return cb();
+      setTimeout(tick, 100);
+    })();
+  }
   function maybeTour(kind) {
     var key = "nsm_tour_" + kind + "_" + S.me.id;
     try { if (localStorage.getItem(key)) return; localStorage.setItem(key, "1"); } catch (e) { return; }
-    if (!S.me.tour_done) return; // сначала — общее обучение
-    setTimeout(function () { startTour(TOURS[kind], true); }, 400);
+    if (!S.me.tour_done || tourEl || S.topicRun) return; // сначала — общий обзор; идущую тему не перебиваем
+    var steps = kind === "event" ? TOPICS.share.steps.slice(0, 1).concat(TOPICS.attend.steps.slice(0, 2)) : TOPICS.cert.steps.slice(0, allowed(TOPICS.cert) ? 2 : 1);
+    setTimeout(function () { if (!tourEl && !S.topicRun) startTour(steps, true, "Подсказка для нового экрана"); }, 400);
   }
+
   var tourEl = null;
-  function startTour(steps, manual) {
+  function startTour(steps, manual, kicker) {
     steps = steps.filter(function (s) { return !s.need || S.can[s.need]; });
     if (!steps.length) return;
     endTour();
-    var i = 0;
+    var i = 0, openedModal = null;
     tourEl = document.createElement("div");
     tourEl.className = "tour";
-    tourEl.innerHTML = '<div class="hole"></div><div class="tip" role="dialog" aria-live="polite"></div>';
+    tourEl.innerHTML = '<div class="hole"></div><div class="tip" role="dialog" aria-modal="true" aria-live="polite"><span class="arrow"></span><div class="tbody"></div></div>';
     document.body.appendChild(tourEl);
-    var hole = tourEl.querySelector(".hole"), tip = tourEl.querySelector(".tip");
+    var hole = tourEl.querySelector(".hole"), tip = tourEl.querySelector(".tip"), body = tourEl.querySelector(".tbody"), arrow = tourEl.querySelector(".arrow");
+    function closeOpened() { if (openedModal && document.body.contains(openedModal)) openedModal.remove(); openedModal = null; }
     function finish() {
-      endTour();
+      closeOpened(); endTour();
       if (!manual || !S.me.tour_done) { S.me.tour_done = true; api("tour_done", {}).catch(function () {}); }
     }
+    function target(s) {
+      var el = null;
+      if (s.sel) [].some.call(document.querySelectorAll('[data-tour="' + s.sel + '"]'), function (x) {
+        if (x.offsetParent !== null || getComputedStyle(x).position === "fixed") { el = x; return true; }
+      });
+      return el;
+    }
     function place() {
-      var s = steps[i], el = null;
-      if (s.sel) [].some.call(document.querySelectorAll('[data-tour="' + s.sel + '"]'), function (x) { if (x.offsetParent !== null || getComputedStyle(x).position === "fixed") { el = x; return true; } });
-      if (el) {
-        var r = el.getBoundingClientRect();
-        if (r.top < 70 || r.bottom > innerHeight - 20) { el.scrollIntoView({ block: "center" }); r = el.getBoundingClientRect(); }
-        var pad = 6;
-        hole.className = "hole";
-        hole.style.cssText = "left:" + (r.left - pad) + "px;top:" + (r.top - pad) + "px;width:" + (r.width + pad * 2) + "px;height:" + (r.height + pad * 2) + "px";
-        var tw = Math.min(340, innerWidth - 24), th = tip.offsetHeight || 180;
-        var top = r.bottom + 14 + th < innerHeight ? r.bottom + 14 : Math.max(12, r.top - th - 14);
-        var left = Math.max(12, Math.min(innerWidth - tw - 12, r.left + r.width / 2 - tw / 2));
-        tip.style.left = left + "px"; tip.style.top = top + "px";
-      } else {
-        hole.className = "hole none"; hole.style.cssText = "";
-        tip.style.left = Math.max(12, (innerWidth - Math.min(340, innerWidth - 24)) / 2) + "px";
-        tip.style.top = Math.max(12, innerHeight / 2 - (tip.offsetHeight || 180) / 2) + "px";
+      var s = steps[i], el = target(s), tw = Math.min(360, innerWidth - 24), th = tip.offsetHeight || 220;
+      tip.style.width = tw + "px";
+      if (!el) {
+        hole.className = "hole none"; hole.style.cssText = ""; arrow.className = "arrow";
+        tip.style.left = (innerWidth - tw) / 2 + "px"; tip.style.top = Math.max(12, innerHeight / 2 - th / 2) + "px";
+        return;
       }
+      var r = el.getBoundingClientRect();
+      if (r.top < 70 || r.bottom > innerHeight - 90) { el.scrollIntoView({ block: "center" }); r = el.getBoundingClientRect(); }
+      var pad = 6, below = r.bottom + 16 + th < innerHeight - 8, above = r.top - th - 16 > 8;
+      hole.className = "hole";
+      hole.style.cssText = "left:" + (r.left - pad) + "px;top:" + (r.top - pad) + "px;width:" + (r.width + pad * 2) + "px;height:" + (r.height + pad * 2) + "px";
+      var left = Math.max(12, Math.min(innerWidth - tw - 12, r.left + r.width / 2 - tw / 2));
+      var top = below ? r.bottom + 16 : above ? r.top - th - 16 : Math.max(12, innerHeight - th - 12);
+      tip.style.left = left + "px"; tip.style.top = top + "px";
+      arrow.className = "arrow" + (below ? " up" : above ? " down" : "");
+      arrow.style.left = Math.max(18, Math.min(tw - 30, r.left + r.width / 2 - left - 6)) + "px";
     }
     function show() {
-      var s = steps[i];
-      tip.innerHTML = '<span class="k">Шаг ' + (i + 1) + " из " + steps.length + "</span><h3>" + esc(s.title) + "</h3><p>" + esc(s.text) + "</p>" +
-        '<div class="row"><button type="button" class="skip" data-t="skip">' + (i === steps.length - 1 ? "" : "Пропустить") + "</button>" +
+      var s = steps[i], last = i === steps.length - 1;
+      body.innerHTML =
+        '<div class="th"><span class="ti">' + svgI(s.icon) + '</span><span class="k">' + esc(kicker || (steps.length > 1 ? "Шаг " + (i + 1) + " из " + steps.length : "Подсказка")) + "</span>" +
+        '<button type="button" class="x" data-t="skip" aria-label="Закрыть подсказки">×</button></div>' +
+        "<h3>" + esc(s.title) + "</h3><p>" + esc(s.text) + "</p>" +
+        (steps.length > 1 ? '<div class="prog"><i style="width:' + ((i + 1) / steps.length * 100) + '%"></i></div>' : "") +
+        '<div class="tf"><span class="keys">' + (matchMedia("(hover: hover)").matches ? "← → для перехода, Esc — закрыть" : "") + "</span>" +
         '<div class="row">' + (i ? '<button type="button" class="btn ghost small" data-t="back">Назад</button>' : "") +
-        '<button type="button" class="btn small" data-t="next">' + (i === steps.length - 1 ? "Понятно" : "Далее") + "</button></div></div>";
+        '<button type="button" class="btn small" data-t="next">' + (last ? "Понятно" : "Далее") + "</button></div></div>";
+      // нужный экран и окно для шага
+      if (!s.open && openedModal) closeOpened();
       var go = s.go && location.hash !== s.go && !(s.go === "#/" && (location.hash === "" || location.hash === "#")) ? s.go : null;
-      if (go) { location.hash = go; waitFor(s.sel, place); } else place();
-      var nb = tip.querySelector('[data-t="next"]'); if (nb) nb.focus();
-    }
-    function waitFor(sel, cb) {
-      var n = 0;
-      (function tick() {
-        if (!tourEl) return;
-        if (!sel || document.querySelector('[data-tour="' + sel + '"]') || n++ > 30) return cb();
-        setTimeout(tick, 100);
-      })();
+      if (go) { closeOpened(); location.hash = go; }
+      waitFor(go ? (s.open ? null : s.sel) : null, function () {
+        if (s.open && !document.querySelector(".modal")) {
+          var before = document.querySelectorAll(".modal").length;
+          if (s.open === "form") eventModal(null);
+          else if (s.open === "user") addUserModal();
+          else if (s.open === "cert") { var b = document.getElementById("pCert"); if (b) b.click(); }
+          var ms = document.querySelectorAll(".modal");
+          if (ms.length > before) openedModal = ms[ms.length - 1];
+        }
+        waitFor(s.sel, function () { setTimeout(place, 30); });
+      });
+      tip.classList.remove("in"); void tip.offsetWidth; tip.classList.add("in");
+      var nb = body.querySelector('[data-t="next"]'); if (nb && matchMedia("(hover: hover)").matches) nb.focus();
     }
     tip.onclick = function (e) {
       var b = e.target.closest("[data-t]"); if (!b) return;
@@ -865,19 +983,19 @@
       else finish();
     };
     tourEl._onKey = function (e) {
-      if (e.key === "Escape") finish();
-      else if (e.key === "ArrowRight" || e.key === "Enter") { e.preventDefault(); if (i >= steps.length - 1) finish(); else { i++; show(); } }
+      if (e.key === "Escape") { e.stopPropagation(); finish(); }
+      else if (e.key === "ArrowRight") { e.preventDefault(); if (i >= steps.length - 1) finish(); else { i++; show(); } }
       else if (e.key === "ArrowLeft" && i) { i--; show(); }
     };
     tourEl._onResize = function () { place(); };
-    document.addEventListener("keydown", tourEl._onKey);
+    document.addEventListener("keydown", tourEl._onKey, true);
     window.addEventListener("resize", tourEl._onResize);
     window.addEventListener("scroll", tourEl._onResize, { passive: true });
     show();
   }
   function endTour() {
     if (!tourEl) return;
-    document.removeEventListener("keydown", tourEl._onKey);
+    document.removeEventListener("keydown", tourEl._onKey, true);
     window.removeEventListener("resize", tourEl._onResize);
     window.removeEventListener("scroll", tourEl._onResize);
     tourEl.remove(); tourEl = null;
