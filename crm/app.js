@@ -807,7 +807,7 @@
   var ROLE_HINT = {
     manager: "Мероприятия, записи, отметки «пришёл» и участники",
     head: "Всё, что у сержанта, плюс сертификаты, сводка, выгрузки и команда",
-    dev: "Полный доступ, в том числе к учёткам инженеров",
+    dev: "Разработчик штаба: полный доступ, учётка одна",
   };
   function viewTeam() {
     shell("team", '<div class="empty">Загружаю…</div>');
@@ -833,7 +833,7 @@
   }
   function addUserModal() {
     var roles = S.dict.roles;
-    var allowed = ["manager", "head", "dev"].filter(function (r) { return S.me.role === "dev" || r !== "dev"; });
+    var allowed = ["manager", "head"]; // Инженер — только учётка разработчика, её не создают
     modal("<h2>Новый человек в команде</h2><form id=\"uf\" class=\"stack\">" +
       '<label class="f">Имя<input type="text" id="u_name" autocomplete="off" required placeholder="Например: Артём"></label>' +
       '<fieldset class="opts" data-tour="u-role"><legend>Роль</legend>' + allowed.map(function (r) {
