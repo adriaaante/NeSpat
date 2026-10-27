@@ -127,6 +127,13 @@ CREATE INDEX pub_hits_ts ON pub_hits(ts);
 PRAGMA user_version = 1;
 SQL);
     }
+    if ($v < 2) {
+        // человек из команды — тоже участник клуба: учётка связана с карточкой по телефону
+        $db->exec(<<<SQL
+ALTER TABLE users ADD COLUMN person_id INTEGER REFERENCES people(id);
+PRAGMA user_version = 2;
+SQL);
+    }
 }
 
 function crm_kv(string $k, ?string $set = null): ?string

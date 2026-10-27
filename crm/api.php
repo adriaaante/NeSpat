@@ -352,9 +352,11 @@ try {
         // ---- команда ----
         case 'users':
             $need('team');
-            $rows = $db->query('SELECT id, name, role, active, created_at, last_login FROM users WHERE active = 1 ORDER BY role, name')->fetchAll();
+            $rows = $db->query('SELECT u.id, u.name, u.role, u.active, u.created_at, u.last_login, u.person_id, p.phone
+                FROM users u LEFT JOIN people p ON p.id = u.person_id WHERE u.active = 1 ORDER BY u.role, u.name')->fetchAll();
             foreach ($rows as &$r) {
                 $r['can_manage'] = crm_can_manage($me, $r['role']) && (int)$r['id'] !== $meId;
+                $r['can_phone'] = (int)$r['id'] === $meId || $r['can_manage'];
             }
             out(['ok' => true, 'users' => $rows]);
 
@@ -372,16 +374,30 @@ try {
             if (!crm_can_manage($me, $role)) {
                 fail('Нет прав создавать эту роль', 403);
             }
+            $pid = team_person($db, $str('phone', 40), $name, null);
             try {
                 $pin = crm_pick_pin($str('pin', 6));
             } catch (InvalidArgumentException $e) {
                 fail($e->getMessage());
             }
-            $db->prepare('INSERT INTO users(name, role, pin_hash, created_at, created_by) VALUES(?,?,?,?,?)')
-                ->execute([$name, $role, crm_pin_hash($pin), time(), $meId]);
+            $db->prepare('INSERT INTO users(name, role, pin_hash, created_at, created_by, person_id) VALUES(?,?,?,?,?,?)')
+                ->execute([$name, $role, crm_pin_hash($pin), time(), $meId, $pid]);
             $id = (int)$db->lastInsertId();
             crm_log($meId, 'user_create', null, null, $name, ['user' => $id, 'role' => $role]);
             out(['ok' => true, 'id' => $id, 'pin' => $pin]);
+
+        case 'user_phone':
+            // телефон человека из команды — заодно его карточка участника
+            $st = $db->prepare('SELECT * FROM users WHERE id = ? AND active = 1');
+            $st->execute([$int('id')]);
+            $u = $st->fetch();
+            if (!$u || ((int)$u['id'] !== $meId && (!crm_can($me, 'team') || !crm_can_manage($me, $u['role'])))) {
+                fail('Нет прав на этого человека', 403);
+            }
+            $pid = team_person($db, $str('phone', 40), $u['name'], (int)$u['id']);
+            $db->prepare('UPDATE users SET person_id = ? WHERE id = ?')->execute([$pid, $u['id']]);
+            crm_log($meId, 'user_phone', null, $pid, $u['name'], ['user' => (int)$u['id']]);
+            out(['ok' => true, 'person_id' => $pid]);
 
         case 'user_pin_reset':
         case 'user_delete':
@@ -430,6 +446,21 @@ function public_user(array $u): array
 {
     return ['id' => (int)$u['id'], 'name' => $u['name'], 'role' => $u['role'],
         'must_change' => (int)$u['must_change'] === 1, 'tour_done' => (int)($u['tour_done'] ?? 0) === 1];
+}
+
+/** Карточка участника для человека из команды: по телефону найти или завести; один телефон — одна учётка. */
+function team_person(PDO $db, string $raw, string $name, ?int $exceptUser): int
+{
+    $phone = crm_phone($raw);
+    if (!$phone) {
+        fail('Укажите телефон — человек из команды тоже участник клуба');
+    }
+    $st = $db->prepare('SELECT u.name FROM users u JOIN people p ON p.id = u.person_id WHERE p.phone = ? AND u.active = 1 AND u.id IS NOT ?');
+    $st->execute([$phone, $exceptUser]);
+    if ($other = $st->fetchColumn()) {
+        fail('Этот телефон уже у «' . $other . '» в команде');
+    }
+    return crm_person($phone, $name, 'team');
 }
 
 function new_code(PDO $db): string

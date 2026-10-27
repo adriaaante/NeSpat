@@ -818,16 +818,19 @@
         '<div class="people" id="people" data-tour="team-list">' + d.users.map(function (u) {
           return '<div class="person"><span class="ava ava-' + u.role + '">' + esc(initials(u.name)) + '</span><div class="pinfo"><div class="nm">' + esc(u.name) +
             (+u.id === +S.me.id ? ' <span class="muted small">· вы</span>' : "") + '</div><div class="meta"><b style="color:var(--ink);font-weight:500">' + esc(roles[u.role]) + "</b> · " +
+            (u.phone ? '<a href="#/person/' + u.person_id + '" style="color:inherit">' + esc(fmtPhone(u.phone)) + "</a> · " : "") +
             (u.last_login ? "входил " + ago(u.last_login) : "ещё не входил") + "</div></div>" +
-            (u.can_manage ? '<div class="pact"><button type="button" class="link2" data-pin="' + u.id + '" data-name="' + esc(u.name) + '">Сменить PIN</button>' +
-              '<button type="button" class="link2" data-del="' + u.id + '" data-name="' + esc(u.name) + '">Удалить</button></div>' : "") + "</div>";
+            '<div class="pact">' + (u.can_phone ? '<button type="button" class="link2" data-ph="' + u.id + '" data-name="' + esc(u.name) + '" data-cur="' + esc(u.phone || "") + '">' + (u.phone ? "Телефон" : "Указать телефон") + "</button>" : "") +
+            (u.can_manage ? '<button type="button" class="link2" data-pin="' + u.id + '" data-name="' + esc(u.name) + '">Сменить PIN</button>' +
+              '<button type="button" class="link2" data-del="' + u.id + '" data-name="' + esc(u.name) + '">Удалить</button>' : "") + "</div></div>";
         }).join("") + "</div>" +
         '<p class="hint" style="margin-top:10px">' + Object.keys(ROLE_HINT).reverse().map(function (r) { return "<b>" + esc(roles[r]) + "</b> — " + esc(ROLE_HINT[r].toLowerCase()); }).join(". ") + ".</p>");
       document.getElementById("addUser").onclick = addUserModal;
       document.getElementById("people").onclick = function (e) {
         var b = e.target.closest("button"); if (!b) return;
-        var id = +(b.getAttribute("data-del") || b.getAttribute("data-pin")), name = b.getAttribute("data-name");
-        if (b.hasAttribute("data-del")) deleteUserModal(id, name); else resetPinModal(id, name);
+        var id = +(b.getAttribute("data-del") || b.getAttribute("data-pin") || b.getAttribute("data-ph")), name = b.getAttribute("data-name");
+        if (b.hasAttribute("data-ph")) userPhoneModal(id, name, b.getAttribute("data-cur"));
+        else if (b.hasAttribute("data-del")) deleteUserModal(id, name); else resetPinModal(id, name);
       };
     }).catch(fail);
   }
@@ -835,7 +838,9 @@
     var roles = S.dict.roles;
     var allowed = ["manager", "head"]; // Инженер — только учётка разработчика, её не создают
     modal("<h2>Новый человек в команде</h2><form id=\"uf\" class=\"stack\">" +
-      '<label class="f">Имя<input type="text" id="u_name" autocomplete="off" required placeholder="Например: Артём"></label>' +
+      '<div class="grid2" data-tour="u-phone"><label class="f">Имя и фамилия<input type="text" id="u_name" autocomplete="off" required placeholder="Например: Артём Ковалёв"></label>' +
+      '<label class="f">Телефон<input type="tel" id="u_phone" required placeholder="+7 (___) ___-__-__"></label></div>' +
+      '<p class="hint" style="margin-top:-6px">Человек из команды — тоже участник клуба: по телефону у него будет карточка с посещениями и званием. Если он уже есть в базе — учётка привяжется к нему.</p>' +
       '<fieldset class="opts" data-tour="u-role"><legend>Роль</legend>' + allowed.map(function (r) {
         return '<label class="opt"><input type="radio" name="u_role" value="' + r + '"' + (r === "manager" ? " checked" : "") + "><span><b>" + esc(roles[r]) + "</b><small>" + esc(ROLE_HINT[r]) + "</small></span></label>";
       }).join("") + "</fieldset>" +
@@ -843,10 +848,24 @@
       '<p class="hint">Пустое поле — PIN придумаем сами. При первом входе человек заменит его на свой.</p>' +
       '<div class="actions"><button type="button" class="btn ghost" data-close>Отмена</button><button class="btn">Добавить</button></div></form>',
       function (m, close) {
+        maskPhone(m.querySelector("#u_phone"));
         m.querySelector("#uf").onsubmit = function (e) {
           e.preventDefault();
           var name = v("u_name"), role = m.querySelector('input[name="u_role"]:checked').value;
-          api("user_create", { name: name, role: role, pin: v("u_pin") }).then(function (r) { close(); pinModal("PIN для входа: " + name, r.pin); }).catch(fail);
+          api("user_create", { name: name, role: role, phone: v("u_phone"), pin: v("u_pin") }).then(function (r) { close(); pinModal("PIN для входа: " + name, r.pin); }).catch(fail);
+        };
+      });
+  }
+  function userPhoneModal(id, name, cur) {
+    modal("<h2>Телефон — " + esc(name) + "</h2><form id=\"upf\" class=\"stack\">" +
+      '<label class="f">Телефон<input type="tel" id="up_phone" required value="' + esc(cur ? fmtPhone(cur) : "") + '" placeholder="+7 (___) ___-__-__"></label>' +
+      '<p class="hint">По телефону у человека из команды будет карточка участника — с посещениями, званием и сертификатами. Если он уже есть в базе, учётка привяжется к нему.</p>' +
+      '<div class="actions"><button type="button" class="btn ghost" data-close>Отмена</button><button class="btn">Сохранить</button></div></form>',
+      function (m, close) {
+        maskPhone(m.querySelector("#up_phone"));
+        m.querySelector("#upf").onsubmit = function (e) {
+          e.preventDefault();
+          api("user_phone", { id: id, phone: v("up_phone") }).then(function () { close(); toast("Телефон сохранён"); viewTeam(); }).catch(fail);
         };
       });
   }
@@ -952,6 +971,7 @@
     ] },
     team: { icon: "team", title: "Как добавить человека в команду", sub: "Роли и PIN", need: "team", steps: [
       { sel: "add-user", go: "#/team", icon: "plus", title: "Добавить в команду", text: "Сержанты ведут мероприятия и отметки, Командиры — ещё и сертификаты, сводку и команду." },
+      { sel: "u-phone", go: "#/team", open: "user", icon: "people", title: "Имя и телефон", text: "Телефон обязателен: человек из команды — тоже участник клуба. По номеру у него появится карточка с посещениями, званием и сертификатами; если он уже записывался — учётка привяжется к его карточке." },
       { sel: "u-role", go: "#/team", open: "user", icon: "team", title: "Роль", text: "Выберите роль — под каждой написано, что она может. Права можно поменять, только пересоздав человека, поэтому выбирайте по задачам." },
       { sel: "u-pin", go: "#/team", open: "user", icon: "lock", title: "Начальный PIN", text: "Оставьте пустым — штаб придумает сам. Передайте PIN лично: при первом входе человек сменит его на свой." },
       { sel: "team-list", go: "#/team", icon: "team", title: "Команда", text: "Здесь видно, кто когда входил. Забыл PIN — «Сменить PIN» выдаст новый временный; ушёл из клуба — «Удалить», доступ пропадёт сразу." },
