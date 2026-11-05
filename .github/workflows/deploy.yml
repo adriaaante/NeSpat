@@ -3,9 +3,9 @@ name: Deploy to Beget
 # Сайт выкладывается автоматически при каждом пуше в основную ветку.
 # Нужны секреты репозитория: FTP_SERVER / FTP_USERNAME / FTP_PASSWORD / FTP_DIR.
 # Пока секретов нет — шаг выкладки пропускается с предупреждением, не ошибкой.
+# 05.11.2026: сайт переехал на сервер Timeweb (45.93.201.72), он сам забирает код с GitHub раз в 5 минут
+# (ops/pull-deploy.php в репо подноль.рф). FTP-выкладка на Beget осталась только ручной — на случай отката.
 on:
-  push:
-    branches: [claude/install-ui-ux-pro-max-skill-8bfxro, main]
   workflow_dispatch:
 
 concurrency:
